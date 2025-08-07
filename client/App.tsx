@@ -99,7 +99,7 @@ const App = () => (
               path="/leave"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Management" />
+                  <LeaveManagement />
                 </ProtectedRoute>
               }
             />
