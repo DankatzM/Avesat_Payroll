@@ -114,7 +114,7 @@ export default function Reports() {
   // Form state
   const [selectedReportType, setSelectedReportType] = useState<ReportType | ''>('');
   const [filters, setFilters] = useState<ReportFilter>({
-    month: '',
+    month: 'all',
     year: new Date().getFullYear().toString(),
     department: 'all',
     employeeStatus: 'all',
