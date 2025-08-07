@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
-import { User, AuthResponse, LoginRequest, UserRole } from '@shared/api';
+import { User, AuthResponse, LoginRequest, UserRole, AuditAction } from '@shared/api';
+import { logAuthAction } from '@shared/audit-service';
 
 interface AuthContextType {
   user: User | null;
@@ -77,6 +78,17 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         setUser(authData.user);
         localStorage.setItem('authToken', authData.token);
         localStorage.setItem('refreshToken', authData.refreshToken);
+
+        // Log successful login
+        logAuthAction(
+          {
+            userId: authData.user.id,
+            userAgent: navigator.userAgent,
+            ipAddress: '127.0.0.1' // In production, get from server
+          },
+          AuditAction.LOGIN
+        );
+
         return true;
       } else {
         return false;
@@ -88,6 +100,18 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = () => {
+    // Log logout before clearing user data
+    if (user) {
+      logAuthAction(
+        {
+          userId: user.id,
+          userAgent: navigator.userAgent,
+          ipAddress: '127.0.0.1' // In production, get from server
+        },
+        AuditAction.LOGOUT
+      );
+    }
+
     setUser(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
