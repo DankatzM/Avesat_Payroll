@@ -72,7 +72,7 @@ const App = () => (
               path="/employees"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Employee Management" />
+                  <Employees />
                 </ProtectedRoute>
               }
             />
