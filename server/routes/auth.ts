@@ -1,13 +1,13 @@
 import { RequestHandler } from "express";
 import { AuthResponse, LoginRequest, User, UserRole } from "@shared/api";
 
-// Mock user database
+// Mock user database - Kenya focused
 const mockUsers: User[] = [
   {
     id: '1',
-    email: 'admin@payrollpro.com',
-    firstName: 'Admin',
-    lastName: 'User',
+    email: 'admin@payrollke.co.ke',
+    firstName: 'James',
+    lastName: 'Mwangi',
     role: UserRole.ADMIN,
     department: 'IT',
     isActive: true,
@@ -16,9 +16,9 @@ const mockUsers: User[] = [
   },
   {
     id: '2',
-    email: 'hr@payrollpro.com',
-    firstName: 'Sarah',
-    lastName: 'Johnson',
+    email: 'hr@payrollke.co.ke',
+    firstName: 'Grace',
+    lastName: 'Wanjiku',
     role: UserRole.HR_MANAGER,
     department: 'Human Resources',
     isActive: true,
@@ -27,9 +27,9 @@ const mockUsers: User[] = [
   },
   {
     id: '3',
-    email: 'payroll@payrollpro.com',
-    firstName: 'Mike',
-    lastName: 'Chen',
+    email: 'payroll@payrollke.co.ke',
+    firstName: 'Peter',
+    lastName: 'Kiprotich',
     role: UserRole.PAYROLL_OFFICER,
     department: 'Finance',
     isActive: true,
@@ -38,9 +38,9 @@ const mockUsers: User[] = [
   },
   {
     id: '4',
-    email: 'employee@payrollpro.com',
-    firstName: 'Emily',
-    lastName: 'Davis',
+    email: 'employee@payrollke.co.ke',
+    firstName: 'Mary',
+    lastName: 'Achieng',
     role: UserRole.EMPLOYEE,
     department: 'Sales',
     isActive: true,
@@ -49,9 +49,9 @@ const mockUsers: User[] = [
   },
   {
     id: '5',
-    email: 'manager@payrollpro.com',
-    firstName: 'David',
-    lastName: 'Wilson',
+    email: 'manager@payrollke.co.ke',
+    firstName: 'Samuel',
+    lastName: 'Otieno',
     role: UserRole.MANAGER,
     department: 'Marketing',
     isActive: true,
@@ -62,11 +62,11 @@ const mockUsers: User[] = [
 
 // Mock password verification (in real app, use bcrypt)
 const mockPasswords: Record<string, string> = {
-  'admin@payrollpro.com': 'admin123',
-  'hr@payrollpro.com': 'hr123',
-  'payroll@payrollpro.com': 'payroll123',
-  'employee@payrollpro.com': 'emp123',
-  'manager@payrollpro.com': 'manager123',
+  'admin@payrollke.co.ke': 'admin123',
+  'hr@payrollke.co.ke': 'hr123',
+  'payroll@payrollke.co.ke': 'payroll123',
+  'employee@payrollke.co.ke': 'emp123',
+  'manager@payrollke.co.ke': 'manager123',
 };
 
 // Generate mock JWT token (in real app, use proper JWT library)
