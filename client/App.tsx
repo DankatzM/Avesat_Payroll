@@ -90,7 +90,7 @@ const App = () => (
               path="/tax"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Tax Management" />
+                  <TaxManagement />
                 </ProtectedRoute>
               }
             />
