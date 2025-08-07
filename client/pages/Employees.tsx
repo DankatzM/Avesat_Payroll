@@ -909,6 +909,50 @@ export default function Employees() {
         </CardContent>
       </Card>
 
+      {/* Success Message */}
+      {showSuccessMessage && newEmployeeCredentials && (
+        <Card className="border-green-200 bg-green-50">
+          <CardHeader>
+            <CardTitle className="text-green-800 flex items-center">
+              <Users className="mr-2 h-5 w-5" />
+              Employee Successfully Registered
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div>
+                  <Label className="text-sm font-medium text-green-700">Employee ID</Label>
+                  <p className="text-sm text-green-900">{newEmployeeCredentials.employeeId}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-green-700">Email</Label>
+                  <p className="text-sm text-green-900">{newEmployeeCredentials.email}</p>
+                </div>
+                <div>
+                  <Label className="text-sm font-medium text-green-700">Temporary Password</Label>
+                  <p className="text-sm text-green-900 font-mono">{newEmployeeCredentials.temporaryPassword}</p>
+                </div>
+              </div>
+              <div className="bg-green-100 p-3 rounded-lg">
+                <p className="text-sm text-green-800">
+                  <strong>Next Steps:</strong> Please share the login credentials with the new employee.
+                  They should change their password on first login. An email notification has been sent to HR.
+                </p>
+              </div>
+              <Button
+                onClick={() => setShowSuccessMessage(false)}
+                variant="outline"
+                size="sm"
+                className="border-green-300 text-green-700 hover:bg-green-100"
+              >
+                Close
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Employee Table */}
       <Card>
         <CardHeader>
