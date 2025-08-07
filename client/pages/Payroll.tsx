@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { logPayrollAction } from '@shared/audit-service';
+import { AuditAction } from '@shared/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -363,6 +365,27 @@ export default function Payroll() {
       setPayrollRuns(prev => [newRun, ...prev]);
       setCurrentRun(newRun);
       setCurrentStep(7);
+
+      // Log audit entry for payroll processing
+      logPayrollAction(
+        {
+          userId: user?.id || 'unknown',
+          userAgent: navigator.userAgent,
+          ipAddress: '127.0.0.1' // In production, get from server
+        },
+        AuditAction.CALCULATE,
+        newRun.id,
+        undefined,
+        {
+          batchName: selectedBatch.name,
+          period: `${selectedMonth}/${selectedYear}`,
+          totalGrossPay: period.totalGrossPay,
+          totalNetPay: period.totalNetPay,
+          totalDeductions: period.totalDeductions,
+          employeeCount: period.employeeCount,
+          status: period.status
+        }
+      );
       
     } catch (error) {
       console.error('Payroll processing failed:', error);
@@ -378,13 +401,30 @@ export default function Payroll() {
   };
 
   const approvePayroll = (runId: string) => {
-    setPayrollRuns(prev => 
-      prev.map(run => 
-        run.id === runId 
+    const payrollRun = payrollRuns.find(run => run.id === runId);
+
+    setPayrollRuns(prev =>
+      prev.map(run =>
+        run.id === runId
           ? { ...run, status: 'approved' as const }
           : run
       )
     );
+
+    // Log audit entry for payroll approval
+    if (payrollRun) {
+      logPayrollAction(
+        {
+          userId: user?.id || 'unknown',
+          userAgent: navigator.userAgent,
+          ipAddress: '127.0.0.1' // In production, get from server
+        },
+        AuditAction.APPROVE,
+        runId,
+        { status: payrollRun.status },
+        { status: 'approved' }
+      );
+    }
   };
 
   const canProcessPayroll = hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.PAYROLL_OFFICER]);
