@@ -50,8 +50,8 @@ export default function Login() {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 rounded-full mb-4">
             <Calculator className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">PayrollPro</h1>
-          <p className="text-gray-600">Complete Payroll Management System</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">PayrollKE</h1>
+          <p className="text-gray-600">Kenya's Complete Payroll Management System</p>
         </div>
 
         <Card className="shadow-xl border-0 bg-white/80 backdrop-blur-sm">
@@ -132,9 +132,11 @@ export default function Login() {
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
               <div className="text-xs text-gray-600 space-y-1">
-                <div>Admin: admin@payrollpro.com / admin123</div>
-                <div>HR Manager: hr@payrollpro.com / hr123</div>
-                <div>Employee: employee@payrollpro.com / emp123</div>
+                <div>Admin: admin@payrollke.co.ke / admin123</div>
+                <div>HR Manager: hr@payrollke.co.ke / hr123</div>
+                <div>Payroll Officer: payroll@payrollke.co.ke / payroll123</div>
+                <div>Manager: manager@payrollke.co.ke / manager123</div>
+                <div>Employee: employee@payrollke.co.ke / emp123</div>
               </div>
             </div>
           </CardContent>
@@ -143,7 +145,7 @@ export default function Login() {
         <div className="text-center mt-6 text-sm text-gray-600">
           <div className="flex items-center justify-center">
             <Building2 className="w-4 h-4 mr-1" />
-            Secure and reliable payroll management
+            Secure payroll management for Kenyan businesses
           </div>
         </div>
       </div>
