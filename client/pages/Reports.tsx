@@ -601,7 +601,7 @@ export default function Reports() {
   const resetForm = () => {
     setSelectedReportType('');
     setFilters({
-      month: '',
+      month: 'all',
       year: new Date().getFullYear().toString(),
       department: 'all',
       employeeStatus: 'all',
