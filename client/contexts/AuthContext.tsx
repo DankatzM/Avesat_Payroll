@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { User, AuthResponse, LoginRequest, UserRole, AuditAction } from '@shared/api';
 import { logAuthAction } from '@shared/audit-service';
+import { UserPermissions } from '@shared/auth-service';
 
 interface AuthContextType {
   user: User | null;
