@@ -108,7 +108,7 @@ const App = () => (
               path="/payslips"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Payslips" />
+                  <Payslips />
                 </ProtectedRoute>
               }
             />
