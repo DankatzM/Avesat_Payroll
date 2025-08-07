@@ -1,5 +1,5 @@
 import { RequestHandler } from "express";
-import { AuthResponse, LoginRequest, User, UserRole } from "@shared/api";
+import { AuthResponse, LoginRequest, User, UserRole } from "../../shared/api";
 
 // Mock user database - Kenya focused
 const mockUsers: User[] = [
