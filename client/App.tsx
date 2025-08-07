@@ -139,6 +139,46 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/admin-dashboard"
+              element={
+                <ProtectedRoute>
+                  <AdminDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/hr-dashboard"
+              element={
+                <ProtectedRoute>
+                  <HRDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll-dashboard"
+              element={
+                <ProtectedRoute>
+                  <PayrollDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/manager-dashboard"
+              element={
+                <ProtectedRoute>
+                  <ManagerDashboard />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employee-dashboard"
+              element={
+                <ProtectedRoute>
+                  <EmployeeDashboard />
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
