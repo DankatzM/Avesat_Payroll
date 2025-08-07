@@ -118,24 +118,24 @@ export default function Employees() {
           id: '1',
           employeeNumber: 'EMP001',
           firstName: 'John',
-          lastName: 'Doe',
-          email: 'john.doe@company.com',
-          phone: '+1 (555) 123-4567',
-          address: '123 Main St, City, State 12345',
+          lastName: 'Mwangi',
+          email: 'john.mwangi@company.co.ke',
+          phone: '+254 712 345 678',
+          address: 'P.O. Box 123, Nairobi, Kenya',
           dateOfBirth: '1990-05-15',
           hireDate: '2022-01-15',
           position: 'Software Engineer',
           department: 'Engineering',
-          salary: 75000,
+          salary: 1200000, // KES 1.2M annually
           payrollCategory: PayrollCategory.MONTHLY,
           bankDetails: {
-            bankName: 'Bank of America',
+            bankName: 'Equity Bank',
             accountNumber: '1234567890',
-            sortCode: '123456',
-            accountHolderName: 'John Doe',
+            sortCode: '680000', // Equity Bank sort code
+            accountHolderName: 'John Mwangi',
           },
           taxInformation: {
-            taxNumber: 'TIN123456789',
+            taxNumber: 'A123456789A', // KRA PIN format
             taxCode: 'T1',
             isStudentLoan: false,
             pensionContribution: 5,
@@ -147,27 +147,27 @@ export default function Employees() {
         {
           id: '2',
           employeeNumber: 'EMP002',
-          firstName: 'Jane',
-          lastName: 'Smith',
-          email: 'jane.smith@company.com',
-          phone: '+1 (555) 987-6543',
-          address: '456 Oak Ave, City, State 12345',
+          firstName: 'Grace',
+          lastName: 'Wanjiku',
+          email: 'grace.wanjiku@company.co.ke',
+          phone: '+254 722 987 654',
+          address: 'P.O. Box 456, Nairobi, Kenya',
           dateOfBirth: '1988-08-22',
           hireDate: '2021-06-01',
           position: 'Marketing Manager',
           department: 'Marketing',
-          salary: 65000,
+          salary: 950000, // KES 950K annually
           payrollCategory: PayrollCategory.MONTHLY,
           bankDetails: {
-            bankName: 'Wells Fargo',
+            bankName: 'KCB Bank',
             accountNumber: '9876543210',
-            sortCode: '654321',
-            accountHolderName: 'Jane Smith',
+            sortCode: '010000', // KCB sort code
+            accountHolderName: 'Grace Wanjiku',
           },
           taxInformation: {
-            taxNumber: 'TIN987654321',
+            taxNumber: 'A987654321B', // KRA PIN format
             taxCode: 'T1',
-            isStudentLoan: true,
+            isStudentLoan: false,
             pensionContribution: 6,
           },
           isActive: true,
@@ -177,25 +177,25 @@ export default function Employees() {
         {
           id: '3',
           employeeNumber: 'EMP003',
-          firstName: 'Michael',
-          lastName: 'Johnson',
-          email: 'michael.johnson@company.com',
-          phone: '+1 (555) 555-1234',
-          address: '789 Pine St, City, State 12345',
+          firstName: 'Samuel',
+          lastName: 'Otieno',
+          email: 'samuel.otieno@company.co.ke',
+          phone: '+254 733 555 123',
+          address: 'P.O. Box 789, Mombasa, Kenya',
           dateOfBirth: '1985-12-10',
           hireDate: '2020-03-15',
           position: 'Sales Director',
           department: 'Sales',
-          salary: 85000,
+          salary: 1500000, // KES 1.5M annually
           payrollCategory: PayrollCategory.MONTHLY,
           bankDetails: {
-            bankName: 'Chase Bank',
+            bankName: 'Cooperative Bank',
             accountNumber: '5555555555',
-            sortCode: '555555',
-            accountHolderName: 'Michael Johnson',
+            sortCode: '070000', // Co-op Bank sort code
+            accountHolderName: 'Samuel Otieno',
           },
           taxInformation: {
-            taxNumber: 'TIN555555555',
+            taxNumber: 'A555555555C', // KRA PIN format
             taxCode: 'T2',
             isStudentLoan: false,
             pensionContribution: 8,
@@ -224,9 +224,9 @@ export default function Employees() {
   });
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
     }).format(amount);
   };
 
@@ -509,7 +509,7 @@ export default function Employees() {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="sortCode">Sort Code</Label>
+            <Label htmlFor="sortCode">Bank Code</Label>
             <Input
               id="sortCode"
               value={formData.sortCode}
@@ -525,7 +525,7 @@ export default function Employees() {
         <h3 className="text-lg font-medium">Tax Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="taxNumber">Tax Number</Label>
+            <Label htmlFor="taxNumber">KRA PIN</Label>
             <Input
               id="taxNumber"
               value={formData.taxNumber}
