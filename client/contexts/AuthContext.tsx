@@ -5,7 +5,8 @@ import { UserPermissions } from '@shared/auth-service';
 
 interface AuthContextType {
   user: User | null;
-  login: (credentials: LoginRequest) => Promise<boolean>;
+  permissions: UserPermissions | null;
+  login: (credentials: LoginRequest) => Promise<{ success: boolean; redirectUrl?: string }>;
   logout: () => void;
   isAuthenticated: boolean;
   isLoading: boolean;
