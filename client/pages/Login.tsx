@@ -85,6 +85,14 @@ export default function Login() {
         setAuthSteps(allSteps.slice(0, i + 1));
         setAuthProgress(20 * (i + 1));
       }
+
+      // Step 4 & 5: Redirect to role-based dashboard after completion
+      if (loginResult.redirectUrl) {
+        console.log(`[LOGIN] Redirecting to: ${loginResult.redirectUrl}`);
+        setTimeout(() => {
+          navigate(loginResult.redirectUrl!);
+        }, 1000);
+      }
     }
 
     setIsSubmitting(false);
