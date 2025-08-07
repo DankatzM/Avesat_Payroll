@@ -193,6 +193,33 @@ export default function Login() {
               </Button>
             </form>
 
+            {/* Authentication Steps Progress */}
+            {showSteps && (
+              <div className="mt-6 p-4 bg-blue-50 rounded-lg">
+                <h3 className="text-sm font-medium text-gray-700 mb-3">Authentication Process</h3>
+                <Progress value={authProgress} className="mb-4" />
+                <div className="space-y-2">
+                  {authSteps.map((step) => (
+                    <div key={step.step} className="flex items-center space-x-3">
+                      {getStepIcon(step.status)}
+                      <div className="flex-1">
+                        <div className="flex items-center space-x-2">
+                          <span className="text-sm font-medium">Step {step.step}</span>
+                          <Badge className={getStepBadgeColor(step.status)}>
+                            {step.status.toUpperCase()}
+                          </Badge>
+                        </div>
+                        <p className="text-xs text-gray-600">{step.title}</p>
+                        {step.message && (
+                          <p className="text-xs text-gray-500 italic">{step.message}</p>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {/* Demo Credentials */}
             <div className="mt-6 p-4 bg-gray-50 rounded-lg">
               <h3 className="text-sm font-medium text-gray-700 mb-2">Demo Credentials:</h3>
