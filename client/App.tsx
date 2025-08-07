@@ -17,6 +17,7 @@ import LeaveManagement from "./pages/LeaveManagement";
 import Payslips from "./pages/Payslips";
 import Reports from "./pages/Reports";
 import AuditLogs from "./pages/AuditLogs";
+import { AdminDashboard, HRDashboard, PayrollDashboard, ManagerDashboard, EmployeeDashboard } from "./pages/RoleDashboards";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
