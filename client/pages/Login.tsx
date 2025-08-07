@@ -6,7 +6,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { Eye, EyeOff, Building2, Calculator } from 'lucide-react';
+import { Progress } from '@/components/ui/progress';
+import { Badge } from '@/components/ui/badge';
+import { Eye, EyeOff, Building2, Calculator, CheckCircle, AlertCircle, Clock } from 'lucide-react';
+import { AuthenticationStep } from '@shared/auth-service';
 
 export default function Login() {
   const { login, isAuthenticated, isLoading } = useAuth();
@@ -15,6 +18,9 @@ export default function Login() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [authSteps, setAuthSteps] = useState<AuthenticationStep[]>([]);
+  const [showSteps, setShowSteps] = useState(false);
+  const [authProgress, setAuthProgress] = useState(0);
 
   if (isAuthenticated) {
     return <Navigate to="/" replace />;
@@ -32,14 +38,73 @@ export default function Login() {
     e.preventDefault();
     setError('');
     setIsSubmitting(true);
+    setShowSteps(true);
+    setAuthSteps([]);
+    setAuthProgress(0);
+
+    // Step 1: Show credential capture
+    const step1: AuthenticationStep = {
+      step: 1,
+      title: 'User enters username and password',
+      status: 'in_progress',
+      message: 'Capturing credentials...'
+    };
+    setAuthSteps([step1]);
+    setAuthProgress(20);
+    await new Promise(resolve => setTimeout(resolve, 500));
+
+    setAuthSteps([{ ...step1, status: 'completed', message: 'Credentials captured successfully' }]);
+    setAuthProgress(40);
+    await new Promise(resolve => setTimeout(resolve, 300));
 
     const success = await login({ email, password });
-    
+
     if (!success) {
+      const failedStep: AuthenticationStep = {
+        step: 2,
+        title: 'Hash input password and compare with stored hash',
+        status: 'failed',
+        message: 'Authentication failed - invalid credentials'
+      };
+      setAuthSteps(prev => [...prev, failedStep]);
       setError('Invalid email or password. Please try again.');
+      setAuthProgress(100);
+    } else {
+      // Show successful completion of all steps
+      const allSteps: AuthenticationStep[] = [
+        { step: 1, title: 'User enters username and password', status: 'completed', message: 'Credentials captured' },
+        { step: 2, title: 'Hash input password and compare with stored hash', status: 'completed', message: 'Password verified' },
+        { step: 3, title: 'Fetch user role and permissions', status: 'completed', message: 'Role and permissions loaded' },
+        { step: 4, title: 'Redirect to appropriate dashboard', status: 'completed', message: 'Dashboard determined' },
+        { step: 5, title: 'Log login timestamp and IP address', status: 'completed', message: 'Audit trail updated' }
+      ];
+
+      for (let i = 1; i < allSteps.length; i++) {
+        await new Promise(resolve => setTimeout(resolve, 300));
+        setAuthSteps(allSteps.slice(0, i + 1));
+        setAuthProgress(20 * (i + 1));
+      }
     }
-    
+
     setIsSubmitting(false);
+  };
+
+  const getStepIcon = (status: string) => {
+    switch (status) {
+      case 'completed': return <CheckCircle className="w-4 h-4 text-green-500" />;
+      case 'failed': return <AlertCircle className="w-4 h-4 text-red-500" />;
+      case 'in_progress': return <Clock className="w-4 h-4 text-blue-500 animate-pulse" />;
+      default: return <div className="w-4 h-4 rounded-full bg-gray-300" />;
+    }
+  };
+
+  const getStepBadgeColor = (status: string) => {
+    switch (status) {
+      case 'completed': return 'bg-green-100 text-green-800';
+      case 'failed': return 'bg-red-100 text-red-800';
+      case 'in_progress': return 'bg-blue-100 text-blue-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
   };
 
   return (
