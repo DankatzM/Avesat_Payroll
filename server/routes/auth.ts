@@ -1,5 +1,8 @@
 import { RequestHandler } from "express";
 import { AuthResponse, LoginRequest, User, UserRole } from "../../shared/api";
+import { authenticateUser, getUserPermissions } from "../../shared/auth-service";
+import { logAuthAction } from "../../shared/audit-service";
+import { AuditAction } from "../../shared/api";
 
 // Mock user database - Kenya focused
 const mockUsers: User[] = [
@@ -74,9 +77,12 @@ const generateMockToken = (user: User): string => {
   return `mock-jwt-${user.id}-${Date.now()}`;
 };
 
-export const handleLogin: RequestHandler = (req, res) => {
+export const handleLogin: RequestHandler = async (req, res) => {
   try {
     const { email, password }: LoginRequest = req.body;
+    const clientIP = req.ip || req.connection.remoteAddress || '127.0.0.1';
+
+    console.log(`[AUTH SERVER] Starting 5-step authentication for ${email}`);
 
     if (!email || !password) {
       return res.status(400).json({
@@ -85,34 +91,48 @@ export const handleLogin: RequestHandler = (req, res) => {
       });
     }
 
-    // Find user
-    const user = mockUsers.find(u => u.email === email && u.isActive);
-    if (!user) {
+    // Execute 5-step authentication algorithm
+    const authResult = await authenticateUser(email, password, clientIP);
+
+    if (!authResult.success) {
+      console.log(`[AUTH SERVER] Authentication failed for ${email}:`, authResult.error);
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials',
+        error: authResult.error || 'Authentication failed',
+        steps: authResult.steps
       });
     }
 
-    // Verify password
-    if (mockPasswords[email] !== password) {
-      return res.status(401).json({
-        success: false,
-        error: 'Invalid credentials',
-      });
-    }
+    console.log(`[AUTH SERVER] Authentication successful for ${email}`);
+    console.log(`[AUTH SERVER] User role: ${authResult.user?.role}`);
+    console.log(`[AUTH SERVER] Redirect URL: ${authResult.redirectUrl}`);
 
     // Generate tokens
-    const token = generateMockToken(user);
+    const token = generateMockToken(authResult.user!);
     const refreshToken = `refresh-${token}`;
 
+    // Log successful authentication to audit trail
+    logAuthAction(
+      {
+        userId: authResult.user!.id,
+        userAgent: req.headers['user-agent'] || 'Unknown',
+        ipAddress: clientIP
+      },
+      AuditAction.LOGIN
+    );
+
     const response: AuthResponse = {
-      user,
+      user: authResult.user!,
       token,
       refreshToken,
     };
 
-    res.json(response);
+    res.json({
+      ...response,
+      permissions: authResult.permissions,
+      redirectUrl: authResult.redirectUrl,
+      authSteps: authResult.steps
+    });
   } catch (error) {
     console.error('Login error:', error);
     res.status(500).json({
