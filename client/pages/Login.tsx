@@ -58,9 +58,9 @@ export default function Login() {
     setAuthProgress(40);
     await new Promise(resolve => setTimeout(resolve, 300));
 
-    const success = await login({ email, password });
+    const loginResult = await login({ email, password });
 
-    if (!success) {
+    if (!loginResult.success) {
       const failedStep: AuthenticationStep = {
         step: 2,
         title: 'Hash input password and compare with stored hash',
