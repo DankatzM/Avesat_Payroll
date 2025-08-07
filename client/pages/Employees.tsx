@@ -21,9 +21,756 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
-import {\n  Table,\n  TableBody,\n  TableCell,\n  TableHead,\n  TableHeader,\n  TableRow,\n} from '@/components/ui/table';
-import {\n  DropdownMenu,\n  DropdownMenuContent,\n  DropdownMenuItem,\n  DropdownMenuTrigger,\n} from '@/components/ui/dropdown-menu';
-import {\n  Plus,\n  Search,\n  Filter,\n  MoreHorizontal,\n  Edit,\n  Trash2,\n  Users,\n  Mail,\n  Phone,\n  MapPin,\n  Calendar,\n  Building2,\n} from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
+import {
+  Plus,
+  Search,
+  Filter,
+  MoreHorizontal,
+  Edit,
+  Trash2,
+  Users,
+  Mail,
+  Phone,
+  MapPin,
+  Calendar,
+  Building2,
+  DollarSign,
+} from 'lucide-react';
 import { Employee, PayrollCategory, UserRole } from '@shared/api';
 
-interface EmployeeFormData {\n  firstName: string;\n  lastName: string;\n  email: string;\n  phone: string;\n  address: string;\n  dateOfBirth: string;\n  hireDate: string;\n  position: string;\n  department: string;\n  salary: number;\n  payrollCategory: PayrollCategory;\n  bankName: string;\n  accountNumber: string;\n  sortCode: string;\n  accountHolderName: string;\n  taxNumber: string;\n  taxCode: string;\n  isStudentLoan: boolean;\n  pensionContribution: number;\n}\n\nexport default function Employees() {\n  const { hasAnyRole } = useAuth();\n  const [employees, setEmployees] = useState<Employee[]>([]);\n  const [searchTerm, setSearchTerm] = useState('');\n  const [selectedDepartment, setSelectedDepartment] = useState('all');\n  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);\n  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);\n  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);\n  const [isLoading, setIsLoading] = useState(true);\n\n  const [formData, setFormData] = useState<EmployeeFormData>({\n    firstName: '',\n    lastName: '',\n    email: '',\n    phone: '',\n    address: '',\n    dateOfBirth: '',\n    hireDate: '',\n    position: '',\n    department: '',\n    salary: 0,\n    payrollCategory: PayrollCategory.MONTHLY,\n    bankName: '',\n    accountNumber: '',\n    sortCode: '',\n    accountHolderName: '',\n    taxNumber: '',\n    taxCode: '',\n    isStudentLoan: false,\n    pensionContribution: 0,\n  });\n\n  useEffect(() => {\n    fetchEmployees();\n  }, []);\n\n  const fetchEmployees = async () => {\n    try {\n      // Mock data for demonstration\n      const mockEmployees: Employee[] = [\n        {\n          id: '1',\n          employeeNumber: 'EMP001',\n          firstName: 'John',\n          lastName: 'Doe',\n          email: 'john.doe@company.com',\n          phone: '+1 (555) 123-4567',\n          address: '123 Main St, City, State 12345',\n          dateOfBirth: '1990-05-15',\n          hireDate: '2022-01-15',\n          position: 'Software Engineer',\n          department: 'Engineering',\n          salary: 75000,\n          payrollCategory: PayrollCategory.MONTHLY,\n          bankDetails: {\n            bankName: 'Bank of America',\n            accountNumber: '1234567890',\n            sortCode: '123456',\n            accountHolderName: 'John Doe',\n          },\n          taxInformation: {\n            taxNumber: 'TIN123456789',\n            taxCode: 'T1',\n            isStudentLoan: false,\n            pensionContribution: 5,\n          },\n          isActive: true,\n          createdAt: '2022-01-15T00:00:00Z',\n          updatedAt: '2024-03-15T00:00:00Z',\n        },\n        {\n          id: '2',\n          employeeNumber: 'EMP002',\n          firstName: 'Jane',\n          lastName: 'Smith',\n          email: 'jane.smith@company.com',\n          phone: '+1 (555) 987-6543',\n          address: '456 Oak Ave, City, State 12345',\n          dateOfBirth: '1988-08-22',\n          hireDate: '2021-06-01',\n          position: 'Marketing Manager',\n          department: 'Marketing',\n          salary: 65000,\n          payrollCategory: PayrollCategory.MONTHLY,\n          bankDetails: {\n            bankName: 'Wells Fargo',\n            accountNumber: '9876543210',\n            sortCode: '654321',\n            accountHolderName: 'Jane Smith',\n          },\n          taxInformation: {\n            taxNumber: 'TIN987654321',\n            taxCode: 'T1',\n            isStudentLoan: true,\n            pensionContribution: 6,\n          },\n          isActive: true,\n          createdAt: '2021-06-01T00:00:00Z',\n          updatedAt: '2024-03-15T00:00:00Z',\n        },\n        {\n          id: '3',\n          employeeNumber: 'EMP003',\n          firstName: 'Michael',\n          lastName: 'Johnson',\n          email: 'michael.johnson@company.com',\n          phone: '+1 (555) 555-1234',\n          address: '789 Pine St, City, State 12345',\n          dateOfBirth: '1985-12-10',\n          hireDate: '2020-03-15',\n          position: 'Sales Director',\n          department: 'Sales',\n          salary: 85000,\n          payrollCategory: PayrollCategory.MONTHLY,\n          bankDetails: {\n            bankName: 'Chase Bank',\n            accountNumber: '5555555555',\n            sortCode: '555555',\n            accountHolderName: 'Michael Johnson',\n          },\n          taxInformation: {\n            taxNumber: 'TIN555555555',\n            taxCode: 'T2',\n            isStudentLoan: false,\n            pensionContribution: 8,\n          },\n          isActive: true,\n          createdAt: '2020-03-15T00:00:00Z',\n          updatedAt: '2024-03-15T00:00:00Z',\n        },\n      ];\n      setEmployees(mockEmployees);\n    } catch (error) {\n      console.error('Failed to fetch employees:', error);\n    } finally {\n      setIsLoading(false);\n    }\n  };\n\n  const departments = ['all', 'Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];\n\n  const filteredEmployees = employees.filter(employee => {\n    const matchesSearch = `${employee.firstName} ${employee.lastName} ${employee.email} ${employee.employeeNumber}`\n      .toLowerCase()\n      .includes(searchTerm.toLowerCase());\n    const matchesDepartment = selectedDepartment === 'all' || employee.department === selectedDepartment;\n    return matchesSearch && matchesDepartment;\n  });\n\n  const formatCurrency = (amount: number) => {\n    return new Intl.NumberFormat('en-US', {\n      style: 'currency',\n      currency: 'USD',\n    }).format(amount);\n  };\n\n  const formatDate = (dateString: string) => {\n    return new Date(dateString).toLocaleDateString('en-US');\n  };\n\n  const resetForm = () => {\n    setFormData({\n      firstName: '',\n      lastName: '',\n      email: '',\n      phone: '',\n      address: '',\n      dateOfBirth: '',\n      hireDate: '',\n      position: '',\n      department: '',\n      salary: 0,\n      payrollCategory: PayrollCategory.MONTHLY,\n      bankName: '',\n      accountNumber: '',\n      sortCode: '',\n      accountHolderName: '',\n      taxNumber: '',\n      taxCode: '',\n      isStudentLoan: false,\n      pensionContribution: 0,\n    });\n  };\n\n  const handleSubmit = async (e: React.FormEvent) => {\n    e.preventDefault();\n    try {\n      // In real app, make API call\n      console.log('Submitting employee data:', formData);\n      \n      // Mock success\n      const newEmployee: Employee = {\n        id: Date.now().toString(),\n        employeeNumber: `EMP${String(employees.length + 1).padStart(3, '0')}`,\n        ...formData,\n        bankDetails: {\n          bankName: formData.bankName,\n          accountNumber: formData.accountNumber,\n          sortCode: formData.sortCode,\n          accountHolderName: formData.accountHolderName,\n        },\n        taxInformation: {\n          taxNumber: formData.taxNumber,\n          taxCode: formData.taxCode,\n          isStudentLoan: formData.isStudentLoan,\n          pensionContribution: formData.pensionContribution,\n        },\n        isActive: true,\n        createdAt: new Date().toISOString(),\n        updatedAt: new Date().toISOString(),\n      };\n      \n      setEmployees([...employees, newEmployee]);\n      setIsAddDialogOpen(false);\n      resetForm();\n    } catch (error) {\n      console.error('Failed to create employee:', error);\n    }\n  };\n\n  const handleEdit = (employee: Employee) => {\n    setEditingEmployee(employee);\n    setFormData({\n      firstName: employee.firstName,\n      lastName: employee.lastName,\n      email: employee.email,\n      phone: employee.phone,\n      address: employee.address,\n      dateOfBirth: employee.dateOfBirth,\n      hireDate: employee.hireDate,\n      position: employee.position,\n      department: employee.department,\n      salary: employee.salary,\n      payrollCategory: employee.payrollCategory,\n      bankName: employee.bankDetails.bankName,\n      accountNumber: employee.bankDetails.accountNumber,\n      sortCode: employee.bankDetails.sortCode,\n      accountHolderName: employee.bankDetails.accountHolderName,\n      taxNumber: employee.taxInformation.taxNumber,\n      taxCode: employee.taxInformation.taxCode,\n      isStudentLoan: employee.taxInformation.isStudentLoan,\n      pensionContribution: employee.taxInformation.pensionContribution,\n    });\n    setIsEditDialogOpen(true);\n  };\n\n  const handleDelete = async (employeeId: string) => {\n    if (confirm('Are you sure you want to delete this employee?')) {\n      try {\n        // In real app, make API call\n        setEmployees(employees.filter(emp => emp.id !== employeeId));\n      } catch (error) {\n        console.error('Failed to delete employee:', error);\n      }\n    }\n  };\n\n  const canManageEmployees = hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.PAYROLL_OFFICER]);\n\n  if (isLoading) {\n    return (\n      <div className=\"p-6\">\n        <div className=\"animate-pulse space-y-6\">\n          <div className=\"h-8 bg-gray-200 rounded w-1/4\"></div>\n          <div className=\"h-64 bg-gray-200 rounded\"></div>\n        </div>\n      </div>\n    );\n  }\n\n  const EmployeeForm = () => (\n    <form onSubmit={handleSubmit} className=\"space-y-6\">\n      {/* Personal Information */}\n      <div className=\"space-y-4\">\n        <h3 className=\"text-lg font-medium\">Personal Information</h3>\n        <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"firstName\">First Name</Label>\n            <Input\n              id=\"firstName\"\n              value={formData.firstName}\n              onChange={(e) => setFormData({...formData, firstName: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"lastName\">Last Name</Label>\n            <Input\n              id=\"lastName\"\n              value={formData.lastName}\n              onChange={(e) => setFormData({...formData, lastName: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"email\">Email</Label>\n            <Input\n              id=\"email\"\n              type=\"email\"\n              value={formData.email}\n              onChange={(e) => setFormData({...formData, email: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"phone\">Phone</Label>\n            <Input\n              id=\"phone\"\n              value={formData.phone}\n              onChange={(e) => setFormData({...formData, phone: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2 md:col-span-2\">\n            <Label htmlFor=\"address\">Address</Label>\n            <Textarea\n              id=\"address\"\n              value={formData.address}\n              onChange={(e) => setFormData({...formData, address: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"dateOfBirth\">Date of Birth</Label>\n            <Input\n              id=\"dateOfBirth\"\n              type=\"date\"\n              value={formData.dateOfBirth}\n              onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"hireDate\">Hire Date</Label>\n            <Input\n              id=\"hireDate\"\n              type=\"date\"\n              value={formData.hireDate}\n              onChange={(e) => setFormData({...formData, hireDate: e.target.value})}\n              required\n            />\n          </div>\n        </div>\n      </div>\n\n      {/* Employment Information */}\n      <div className=\"space-y-4\">\n        <h3 className=\"text-lg font-medium\">Employment Information</h3>\n        <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"position\">Position</Label>\n            <Input\n              id=\"position\"\n              value={formData.position}\n              onChange={(e) => setFormData({...formData, position: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"department\">Department</Label>\n            <Select\n              value={formData.department}\n              onValueChange={(value) => setFormData({...formData, department: value})}\n            >\n              <SelectTrigger>\n                <SelectValue placeholder=\"Select department\" />\n              </SelectTrigger>\n              <SelectContent>\n                {departments.filter(dept => dept !== 'all').map(dept => (\n                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>\n                ))}\n              </SelectContent>\n            </Select>\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"salary\">Annual Salary</Label>\n            <Input\n              id=\"salary\"\n              type=\"number\"\n              value={formData.salary}\n              onChange={(e) => setFormData({...formData, salary: Number(e.target.value)})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"payrollCategory\">Payroll Category</Label>\n            <Select\n              value={formData.payrollCategory}\n              onValueChange={(value) => setFormData({...formData, payrollCategory: value as PayrollCategory})}\n            >\n              <SelectTrigger>\n                <SelectValue />\n              </SelectTrigger>\n              <SelectContent>\n                <SelectItem value={PayrollCategory.MONTHLY}>Monthly</SelectItem>\n                <SelectItem value={PayrollCategory.WEEKLY}>Weekly</SelectItem>\n                <SelectItem value={PayrollCategory.HOURLY}>Hourly</SelectItem>\n              </SelectContent>\n            </Select>\n          </div>\n        </div>\n      </div>\n\n      {/* Bank Details */}\n      <div className=\"space-y-4\">\n        <h3 className=\"text-lg font-medium\">Bank Details</h3>\n        <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"bankName\">Bank Name</Label>\n            <Input\n              id=\"bankName\"\n              value={formData.bankName}\n              onChange={(e) => setFormData({...formData, bankName: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"accountHolderName\">Account Holder Name</Label>\n            <Input\n              id=\"accountHolderName\"\n              value={formData.accountHolderName}\n              onChange={(e) => setFormData({...formData, accountHolderName: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"accountNumber\">Account Number</Label>\n            <Input\n              id=\"accountNumber\"\n              value={formData.accountNumber}\n              onChange={(e) => setFormData({...formData, accountNumber: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"sortCode\">Sort Code</Label>\n            <Input\n              id=\"sortCode\"\n              value={formData.sortCode}\n              onChange={(e) => setFormData({...formData, sortCode: e.target.value})}\n              required\n            />\n          </div>\n        </div>\n      </div>\n\n      {/* Tax Information */}\n      <div className=\"space-y-4\">\n        <h3 className=\"text-lg font-medium\">Tax Information</h3>\n        <div className=\"grid grid-cols-1 md:grid-cols-2 gap-4\">\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"taxNumber\">Tax Number</Label>\n            <Input\n              id=\"taxNumber\"\n              value={formData.taxNumber}\n              onChange={(e) => setFormData({...formData, taxNumber: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"taxCode\">Tax Code</Label>\n            <Input\n              id=\"taxCode\"\n              value={formData.taxCode}\n              onChange={(e) => setFormData({...formData, taxCode: e.target.value})}\n              required\n            />\n          </div>\n          <div className=\"space-y-2\">\n            <Label htmlFor=\"pensionContribution\">Pension Contribution (%)</Label>\n            <Input\n              id=\"pensionContribution\"\n              type=\"number\"\n              min=\"0\"\n              max=\"100\"\n              step=\"0.1\"\n              value={formData.pensionContribution}\n              onChange={(e) => setFormData({...formData, pensionContribution: Number(e.target.value)})}\n              required\n            />\n          </div>\n        </div>\n      </div>\n\n      <div className=\"flex justify-end space-x-2\">\n        <Button\n          type=\"button\"\n          variant=\"outline\"\n          onClick={() => {\n            setIsAddDialogOpen(false);\n            setIsEditDialogOpen(false);\n            resetForm();\n          }}\n        >\n          Cancel\n        </Button>\n        <Button type=\"submit\" className=\"bg-indigo-600 hover:bg-indigo-700\">\n          {editingEmployee ? 'Update Employee' : 'Add Employee'}\n        </Button>\n      </div>\n    </form>\n  );\n\n  return (\n    <div className=\"p-6 space-y-6\">\n      {/* Header */}\n      <div className=\"flex flex-col sm:flex-row sm:items-center sm:justify-between\">\n        <div>\n          <h1 className=\"text-3xl font-bold text-gray-900\">Employee Management</h1>\n          <p className=\"mt-1 text-sm text-gray-600\">\n            Manage employee information, payroll details, and bank information\n          </p>\n        </div>\n        {canManageEmployees && (\n          <div className=\"mt-4 sm:mt-0\">\n            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>\n              <DialogTrigger asChild>\n                <Button className=\"bg-indigo-600 hover:bg-indigo-700\">\n                  <Plus className=\"mr-2 h-4 w-4\" />\n                  Add Employee\n                </Button>\n              </DialogTrigger>\n              <DialogContent className=\"max-w-4xl max-h-[90vh] overflow-y-auto\">\n                <DialogHeader>\n                  <DialogTitle>Add New Employee</DialogTitle>\n                </DialogHeader>\n                <EmployeeForm />\n              </DialogContent>\n            </Dialog>\n          </div>\n        )}\n      </div>\n\n      {/* Stats Cards */}\n      <div className=\"grid grid-cols-1 md:grid-cols-3 gap-6\">\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Total Employees</CardTitle>\n            <Users className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">{employees.length}</div>\n            <p className=\"text-xs text-muted-foreground\">\n              {employees.filter(emp => emp.isActive).length} active\n            </p>\n          </CardContent>\n        </Card>\n\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Departments</CardTitle>\n            <Building2 className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">\n              {new Set(employees.map(emp => emp.department)).size}\n            </div>\n            <p className=\"text-xs text-muted-foreground\">Active departments</p>\n          </CardContent>\n        </Card>\n\n        <Card>\n          <CardHeader className=\"flex flex-row items-center justify-between space-y-0 pb-2\">\n            <CardTitle className=\"text-sm font-medium\">Average Salary</CardTitle>\n            <DollarSign className=\"h-4 w-4 text-muted-foreground\" />\n          </CardHeader>\n          <CardContent>\n            <div className=\"text-2xl font-bold\">\n              {formatCurrency(employees.reduce((sum, emp) => sum + emp.salary, 0) / employees.length || 0)}\n            </div>\n            <p className=\"text-xs text-muted-foreground\">Across all employees</p>\n          </CardContent>\n        </Card>\n      </div>\n\n      {/* Filters */}\n      <Card>\n        <CardContent className=\"pt-6\">\n          <div className=\"flex flex-col sm:flex-row gap-4\">\n            <div className=\"flex-1\">\n              <div className=\"relative\">\n                <Search className=\"absolute left-3 top-3 h-4 w-4 text-gray-400\" />\n                <Input\n                  placeholder=\"Search employees...\"\n                  value={searchTerm}\n                  onChange={(e) => setSearchTerm(e.target.value)}\n                  className=\"pl-10\"\n                />\n              </div>\n            </div>\n            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>\n              <SelectTrigger className=\"w-full sm:w-48\">\n                <Filter className=\"mr-2 h-4 w-4\" />\n                <SelectValue />\n              </SelectTrigger>\n              <SelectContent>\n                {departments.map(dept => (\n                  <SelectItem key={dept} value={dept}>\n                    {dept === 'all' ? 'All Departments' : dept}\n                  </SelectItem>\n                ))}\n              </SelectContent>\n            </Select>\n          </div>\n        </CardContent>\n      </Card>\n\n      {/* Employee Table */}\n      <Card>\n        <CardHeader>\n          <CardTitle>Employees ({filteredEmployees.length})</CardTitle>\n        </CardHeader>\n        <CardContent>\n          <Table>\n            <TableHeader>\n              <TableRow>\n                <TableHead>Employee</TableHead>\n                <TableHead>Position</TableHead>\n                <TableHead>Department</TableHead>\n                <TableHead>Salary</TableHead>\n                <TableHead>Status</TableHead>\n                <TableHead>Hire Date</TableHead>\n                {canManageEmployees && <TableHead>Actions</TableHead>}\n              </TableRow>\n            </TableHeader>\n            <TableBody>\n              {filteredEmployees.map((employee) => (\n                <TableRow key={employee.id}>\n                  <TableCell>\n                    <div className=\"flex items-center space-x-3\">\n                      <Avatar className=\"h-8 w-8\">\n                        <AvatarFallback className=\"bg-indigo-100 text-indigo-700\">\n                          {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}\n                        </AvatarFallback>\n                      </Avatar>\n                      <div>\n                        <div className=\"font-medium\">\n                          {employee.firstName} {employee.lastName}\n                        </div>\n                        <div className=\"text-sm text-gray-500\">\n                          {employee.employeeNumber}\n                        </div>\n                      </div>\n                    </div>\n                  </TableCell>\n                  <TableCell>{employee.position}</TableCell>\n                  <TableCell>{employee.department}</TableCell>\n                  <TableCell>{formatCurrency(employee.salary)}</TableCell>\n                  <TableCell>\n                    <Badge \n                      variant={employee.isActive ? \"default\" : \"secondary\"}\n                      className={employee.isActive ? \"bg-green-100 text-green-800\" : \"\"}\n                    >\n                      {employee.isActive ? 'Active' : 'Inactive'}\n                    </Badge>\n                  </TableCell>\n                  <TableCell>{formatDate(employee.hireDate)}</TableCell>\n                  {canManageEmployees && (\n                    <TableCell>\n                      <DropdownMenu>\n                        <DropdownMenuTrigger asChild>\n                          <Button variant=\"ghost\" className=\"h-8 w-8 p-0\">\n                            <MoreHorizontal className=\"h-4 w-4\" />\n                          </Button>\n                        </DropdownMenuTrigger>\n                        <DropdownMenuContent align=\"end\">\n                          <DropdownMenuItem onClick={() => handleEdit(employee)}>\n                            <Edit className=\"mr-2 h-4 w-4\" />\n                            Edit\n                          </DropdownMenuItem>\n                          <DropdownMenuItem \n                            onClick={() => handleDelete(employee.id)}\n                            className=\"text-red-600\"\n                          >\n                            <Trash2 className=\"mr-2 h-4 w-4\" />\n                            Delete\n                          </DropdownMenuItem>\n                        </DropdownMenuContent>\n                      </DropdownMenu>\n                    </TableCell>\n                  )}\n                </TableRow>\n              ))}\n            </TableBody>\n          </Table>\n        </CardContent>\n      </Card>\n\n      {/* Edit Dialog */}\n      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>\n        <DialogContent className=\"max-w-4xl max-h-[90vh] overflow-y-auto\">\n          <DialogHeader>\n            <DialogTitle>Edit Employee</DialogTitle>\n          </DialogHeader>\n          <EmployeeForm />\n        </DialogContent>\n      </Dialog>\n    </div>\n  );\n}"
+interface EmployeeFormData {
+  firstName: string;
+  lastName: string;
+  email: string;
+  phone: string;
+  address: string;
+  dateOfBirth: string;
+  hireDate: string;
+  position: string;
+  department: string;
+  salary: number;
+  payrollCategory: PayrollCategory;
+  bankName: string;
+  accountNumber: string;
+  sortCode: string;
+  accountHolderName: string;
+  taxNumber: string;
+  taxCode: string;
+  isStudentLoan: boolean;
+  pensionContribution: number;
+}
+
+export default function Employees() {
+  const { hasAnyRole } = useAuth();
+  const [employees, setEmployees] = useState<Employee[]>([]);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [selectedDepartment, setSelectedDepartment] = useState('all');
+  const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  const [formData, setFormData] = useState<EmployeeFormData>({
+    firstName: '',
+    lastName: '',
+    email: '',
+    phone: '',
+    address: '',
+    dateOfBirth: '',
+    hireDate: '',
+    position: '',
+    department: '',
+    salary: 0,
+    payrollCategory: PayrollCategory.MONTHLY,
+    bankName: '',
+    accountNumber: '',
+    sortCode: '',
+    accountHolderName: '',
+    taxNumber: '',
+    taxCode: '',
+    isStudentLoan: false,
+    pensionContribution: 0,
+  });
+
+  useEffect(() => {
+    fetchEmployees();
+  }, []);
+
+  const fetchEmployees = async () => {
+    try {
+      // Mock data for demonstration
+      const mockEmployees: Employee[] = [
+        {
+          id: '1',
+          employeeNumber: 'EMP001',
+          firstName: 'John',
+          lastName: 'Doe',
+          email: 'john.doe@company.com',
+          phone: '+1 (555) 123-4567',
+          address: '123 Main St, City, State 12345',
+          dateOfBirth: '1990-05-15',
+          hireDate: '2022-01-15',
+          position: 'Software Engineer',
+          department: 'Engineering',
+          salary: 75000,
+          payrollCategory: PayrollCategory.MONTHLY,
+          bankDetails: {
+            bankName: 'Bank of America',
+            accountNumber: '1234567890',
+            sortCode: '123456',
+            accountHolderName: 'John Doe',
+          },
+          taxInformation: {
+            taxNumber: 'TIN123456789',
+            taxCode: 'T1',
+            isStudentLoan: false,
+            pensionContribution: 5,
+          },
+          isActive: true,
+          createdAt: '2022-01-15T00:00:00Z',
+          updatedAt: '2024-03-15T00:00:00Z',
+        },
+        {
+          id: '2',
+          employeeNumber: 'EMP002',
+          firstName: 'Jane',
+          lastName: 'Smith',
+          email: 'jane.smith@company.com',
+          phone: '+1 (555) 987-6543',
+          address: '456 Oak Ave, City, State 12345',
+          dateOfBirth: '1988-08-22',
+          hireDate: '2021-06-01',
+          position: 'Marketing Manager',
+          department: 'Marketing',
+          salary: 65000,
+          payrollCategory: PayrollCategory.MONTHLY,
+          bankDetails: {
+            bankName: 'Wells Fargo',
+            accountNumber: '9876543210',
+            sortCode: '654321',
+            accountHolderName: 'Jane Smith',
+          },
+          taxInformation: {
+            taxNumber: 'TIN987654321',
+            taxCode: 'T1',
+            isStudentLoan: true,
+            pensionContribution: 6,
+          },
+          isActive: true,
+          createdAt: '2021-06-01T00:00:00Z',
+          updatedAt: '2024-03-15T00:00:00Z',
+        },
+        {
+          id: '3',
+          employeeNumber: 'EMP003',
+          firstName: 'Michael',
+          lastName: 'Johnson',
+          email: 'michael.johnson@company.com',
+          phone: '+1 (555) 555-1234',
+          address: '789 Pine St, City, State 12345',
+          dateOfBirth: '1985-12-10',
+          hireDate: '2020-03-15',
+          position: 'Sales Director',
+          department: 'Sales',
+          salary: 85000,
+          payrollCategory: PayrollCategory.MONTHLY,
+          bankDetails: {
+            bankName: 'Chase Bank',
+            accountNumber: '5555555555',
+            sortCode: '555555',
+            accountHolderName: 'Michael Johnson',
+          },
+          taxInformation: {
+            taxNumber: 'TIN555555555',
+            taxCode: 'T2',
+            isStudentLoan: false,
+            pensionContribution: 8,
+          },
+          isActive: true,
+          createdAt: '2020-03-15T00:00:00Z',
+          updatedAt: '2024-03-15T00:00:00Z',
+        },
+      ];
+      setEmployees(mockEmployees);
+    } catch (error) {
+      console.error('Failed to fetch employees:', error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const departments = ['all', 'Engineering', 'Marketing', 'Sales', 'HR', 'Finance'];
+
+  const filteredEmployees = employees.filter(employee => {
+    const matchesSearch = `${employee.firstName} ${employee.lastName} ${employee.email} ${employee.employeeNumber}`
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+    const matchesDepartment = selectedDepartment === 'all' || employee.department === selectedDepartment;
+    return matchesSearch && matchesDepartment;
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US');
+  };
+
+  const resetForm = () => {
+    setFormData({
+      firstName: '',
+      lastName: '',
+      email: '',
+      phone: '',
+      address: '',
+      dateOfBirth: '',
+      hireDate: '',
+      position: '',
+      department: '',
+      salary: 0,
+      payrollCategory: PayrollCategory.MONTHLY,
+      bankName: '',
+      accountNumber: '',
+      sortCode: '',
+      accountHolderName: '',
+      taxNumber: '',
+      taxCode: '',
+      isStudentLoan: false,
+      pensionContribution: 0,
+    });
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      // In real app, make API call
+      console.log('Submitting employee data:', formData);
+      
+      // Mock success
+      const newEmployee: Employee = {
+        id: Date.now().toString(),
+        employeeNumber: `EMP${String(employees.length + 1).padStart(3, '0')}`,
+        ...formData,
+        bankDetails: {
+          bankName: formData.bankName,
+          accountNumber: formData.accountNumber,
+          sortCode: formData.sortCode,
+          accountHolderName: formData.accountHolderName,
+        },
+        taxInformation: {
+          taxNumber: formData.taxNumber,
+          taxCode: formData.taxCode,
+          isStudentLoan: formData.isStudentLoan,
+          pensionContribution: formData.pensionContribution,
+        },
+        isActive: true,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      setEmployees([...employees, newEmployee]);
+      setIsAddDialogOpen(false);
+      resetForm();
+    } catch (error) {
+      console.error('Failed to create employee:', error);
+    }
+  };
+
+  const handleEdit = (employee: Employee) => {
+    setEditingEmployee(employee);
+    setFormData({
+      firstName: employee.firstName,
+      lastName: employee.lastName,
+      email: employee.email,
+      phone: employee.phone,
+      address: employee.address,
+      dateOfBirth: employee.dateOfBirth,
+      hireDate: employee.hireDate,
+      position: employee.position,
+      department: employee.department,
+      salary: employee.salary,
+      payrollCategory: employee.payrollCategory,
+      bankName: employee.bankDetails.bankName,
+      accountNumber: employee.bankDetails.accountNumber,
+      sortCode: employee.bankDetails.sortCode,
+      accountHolderName: employee.bankDetails.accountHolderName,
+      taxNumber: employee.taxInformation.taxNumber,
+      taxCode: employee.taxInformation.taxCode,
+      isStudentLoan: employee.taxInformation.isStudentLoan,
+      pensionContribution: employee.taxInformation.pensionContribution,
+    });
+    setIsEditDialogOpen(true);
+  };
+
+  const handleDelete = async (employeeId: string) => {
+    if (confirm('Are you sure you want to delete this employee?')) {
+      try {
+        // In real app, make API call
+        setEmployees(employees.filter(emp => emp.id !== employeeId));
+      } catch (error) {
+        console.error('Failed to delete employee:', error);
+      }
+    }
+  };
+
+  const canManageEmployees = hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.PAYROLL_OFFICER]);
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  const EmployeeForm = () => (
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* Personal Information */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Personal Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="firstName">First Name</Label>
+            <Input
+              id="firstName"
+              value={formData.firstName}
+              onChange={(e) => setFormData({...formData, firstName: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="lastName">Last Name</Label>
+            <Input
+              id="lastName"
+              value={formData.lastName}
+              onChange={(e) => setFormData({...formData, lastName: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="email">Email</Label>
+            <Input
+              id="email"
+              type="email"
+              value={formData.email}
+              onChange={(e) => setFormData({...formData, email: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="phone">Phone</Label>
+            <Input
+              id="phone"
+              value={formData.phone}
+              onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2 md:col-span-2">
+            <Label htmlFor="address">Address</Label>
+            <Textarea
+              id="address"
+              value={formData.address}
+              onChange={(e) => setFormData({...formData, address: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="dateOfBirth">Date of Birth</Label>
+            <Input
+              id="dateOfBirth"
+              type="date"
+              value={formData.dateOfBirth}
+              onChange={(e) => setFormData({...formData, dateOfBirth: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="hireDate">Hire Date</Label>
+            <Input
+              id="hireDate"
+              type="date"
+              value={formData.hireDate}
+              onChange={(e) => setFormData({...formData, hireDate: e.target.value})}
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Employment Information */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Employment Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="position">Position</Label>
+            <Input
+              id="position"
+              value={formData.position}
+              onChange={(e) => setFormData({...formData, position: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="department">Department</Label>
+            <Select
+              value={formData.department}
+              onValueChange={(value) => setFormData({...formData, department: value})}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select department" />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.filter(dept => dept !== 'all').map(dept => (
+                  <SelectItem key={dept} value={dept}>{dept}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="salary">Annual Salary</Label>
+            <Input
+              id="salary"
+              type="number"
+              value={formData.salary}
+              onChange={(e) => setFormData({...formData, salary: Number(e.target.value)})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="payrollCategory">Payroll Category</Label>
+            <Select
+              value={formData.payrollCategory}
+              onValueChange={(value) => setFormData({...formData, payrollCategory: value as PayrollCategory})}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value={PayrollCategory.MONTHLY}>Monthly</SelectItem>
+                <SelectItem value={PayrollCategory.WEEKLY}>Weekly</SelectItem>
+                <SelectItem value={PayrollCategory.HOURLY}>Hourly</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
+      </div>
+
+      {/* Bank Details */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Bank Details</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="bankName">Bank Name</Label>
+            <Input
+              id="bankName"
+              value={formData.bankName}
+              onChange={(e) => setFormData({...formData, bankName: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="accountHolderName">Account Holder Name</Label>
+            <Input
+              id="accountHolderName"
+              value={formData.accountHolderName}
+              onChange={(e) => setFormData({...formData, accountHolderName: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="accountNumber">Account Number</Label>
+            <Input
+              id="accountNumber"
+              value={formData.accountNumber}
+              onChange={(e) => setFormData({...formData, accountNumber: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sortCode">Sort Code</Label>
+            <Input
+              id="sortCode"
+              value={formData.sortCode}
+              onChange={(e) => setFormData({...formData, sortCode: e.target.value})}
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      {/* Tax Information */}
+      <div className="space-y-4">
+        <h3 className="text-lg font-medium">Tax Information</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="taxNumber">Tax Number</Label>
+            <Input
+              id="taxNumber"
+              value={formData.taxNumber}
+              onChange={(e) => setFormData({...formData, taxNumber: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="taxCode">Tax Code</Label>
+            <Input
+              id="taxCode"
+              value={formData.taxCode}
+              onChange={(e) => setFormData({...formData, taxCode: e.target.value})}
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="pensionContribution">Pension Contribution (%)</Label>
+            <Input
+              id="pensionContribution"
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              value={formData.pensionContribution}
+              onChange={(e) => setFormData({...formData, pensionContribution: Number(e.target.value)})}
+              required
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2">
+        <Button
+          type="button"
+          variant="outline"
+          onClick={() => {
+            setIsAddDialogOpen(false);
+            setIsEditDialogOpen(false);
+            resetForm();
+          }}
+        >
+          Cancel
+        </Button>
+        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
+          {editingEmployee ? 'Update Employee' : 'Add Employee'}
+        </Button>
+      </div>
+    </form>
+  );
+
+  return (
+    <div className="p-6 space-y-6">
+      {/* Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Employee Management</h1>
+          <p className="mt-1 text-sm text-gray-600">
+            Manage employee information, payroll details, and bank information
+          </p>
+        </div>
+        {canManageEmployees && (
+          <div className="mt-4 sm:mt-0">
+            <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+              <DialogTrigger asChild>
+                <Button className="bg-indigo-600 hover:bg-indigo-700">
+                  <Plus className="mr-2 h-4 w-4" />
+                  Add Employee
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+                <DialogHeader>
+                  <DialogTitle>Add New Employee</DialogTitle>
+                </DialogHeader>
+                <EmployeeForm />
+              </DialogContent>
+            </Dialog>
+          </div>
+        )}
+      </div>
+
+      {/* Stats Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Total Employees</CardTitle>
+            <Users className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">{employees.length}</div>
+            <p className="text-xs text-muted-foreground">
+              {employees.filter(emp => emp.isActive).length} active
+            </p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Departments</CardTitle>
+            <Building2 className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {new Set(employees.map(emp => emp.department)).size}
+            </div>
+            <p className="text-xs text-muted-foreground">Active departments</p>
+          </CardContent>
+        </Card>
+
+        <Card>
+          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <CardTitle className="text-sm font-medium">Average Salary</CardTitle>
+            <DollarSign className="h-4 w-4 text-muted-foreground" />
+          </CardHeader>
+          <CardContent>
+            <div className="text-2xl font-bold">
+              {formatCurrency(employees.reduce((sum, emp) => sum + emp.salary, 0) / employees.length || 0)}
+            </div>
+            <p className="text-xs text-muted-foreground">Across all employees</p>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Filters */}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="flex-1">
+              <div className="relative">
+                <Search className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Input
+                  placeholder="Search employees..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+            </div>
+            <Select value={selectedDepartment} onValueChange={setSelectedDepartment}>
+              <SelectTrigger className="w-full sm:w-48">
+                <Filter className="mr-2 h-4 w-4" />
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {departments.map(dept => (
+                  <SelectItem key={dept} value={dept}>
+                    {dept === 'all' ? 'All Departments' : dept}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Employee Table */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Employees ({filteredEmployees.length})</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Employee</TableHead>
+                <TableHead>Position</TableHead>
+                <TableHead>Department</TableHead>
+                <TableHead>Salary</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Hire Date</TableHead>
+                {canManageEmployees && <TableHead>Actions</TableHead>}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredEmployees.map((employee) => (
+                <TableRow key={employee.id}>
+                  <TableCell>
+                    <div className="flex items-center space-x-3">
+                      <Avatar className="h-8 w-8">
+                        <AvatarFallback className="bg-indigo-100 text-indigo-700">
+                          {employee.firstName.charAt(0)}{employee.lastName.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <div>
+                        <div className="font-medium">
+                          {employee.firstName} {employee.lastName}
+                        </div>
+                        <div className="text-sm text-gray-500">
+                          {employee.employeeNumber}
+                        </div>
+                      </div>
+                    </div>
+                  </TableCell>
+                  <TableCell>{employee.position}</TableCell>
+                  <TableCell>{employee.department}</TableCell>
+                  <TableCell>{formatCurrency(employee.salary)}</TableCell>
+                  <TableCell>
+                    <Badge 
+                      variant={employee.isActive ? "default" : "secondary"}
+                      className={employee.isActive ? "bg-green-100 text-green-800" : ""}
+                    >
+                      {employee.isActive ? 'Active' : 'Inactive'}
+                    </Badge>
+                  </TableCell>
+                  <TableCell>{formatDate(employee.hireDate)}</TableCell>
+                  {canManageEmployees && (
+                    <TableCell>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" className="h-8 w-8 p-0">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => handleEdit(employee)}>
+                            <Edit className="mr-2 h-4 w-4" />
+                            Edit
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            onClick={() => handleDelete(employee.id)}
+                            className="text-red-600"
+                          >
+                            <Trash2 className="mr-2 h-4 w-4" />
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </TableCell>
+                  )}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </CardContent>
+      </Card>
+
+      {/* Edit Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Employee</DialogTitle>
+          </DialogHeader>
+          <EmployeeForm />
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+}
