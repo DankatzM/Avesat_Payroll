@@ -69,9 +69,10 @@ export interface BankDetails {
 }
 
 export interface TaxInformation {
-  taxNumber: string;
+  kraPin: string; // Kenya Revenue Authority PIN
   taxCode: string;
-  isStudentLoan: boolean;
+  nhifNumber?: string; // National Hospital Insurance Fund
+  nssfNumber?: string; // National Social Security Fund
   pensionContribution: number;
 }
 
@@ -129,24 +130,29 @@ export enum PayrollEntryStatus {
   PAID = 'paid'
 }
 
-// PAYE Tax Types
+// Kenya PAYE Tax Types
 export interface TaxBracket {
   id: string;
   name: string;
-  minIncome: number;
-  maxIncome: number;
-  rate: number;
-  fixedAmount: number;
+  minIncome: number; // Annual income in KES
+  maxIncome: number; // Annual income in KES
+  rate: number; // Tax rate percentage
+  fixedAmount: number; // Fixed amount in KES
+  personalRelief: number; // Personal relief in KES
   isActive: boolean;
 }
 
 export interface TaxCalculation {
-  grossPay: number;
-  taxableIncome: number;
-  taxAmount: number;
+  grossPay: number; // In KES
+  taxableIncome: number; // In KES
+  payeTax: number; // In KES
+  personalRelief: number; // In KES
+  netTax: number; // In KES after personal relief
+  nhifDeduction: number; // In KES
+  nssfDeduction: number; // In KES
+  pensionContribution: number; // In KES
   effectiveRate: number;
   marginalRate: number;
-  pensionContribution: number;
   taxBracket: string;
 }
 
@@ -173,7 +179,8 @@ export enum LeaveType {
   PATERNITY = 'paternity',
   COMPASSIONATE = 'compassionate',
   STUDY = 'study',
-  UNPAID = 'unpaid'
+  UNPAID = 'unpaid',
+  PUBLIC_HOLIDAY = 'public_holiday'
 }
 
 export enum LeaveStatus {
@@ -220,10 +227,11 @@ export interface PayslipEarnings {
 }
 
 export interface PayslipDeductions {
-  tax: number;
-  pension: number;
-  nationalInsurance: number;
-  studentLoan: number;
+  payeTax: number; // PAYE tax
+  pension: number; // Pension contribution
+  nhif: number; // National Hospital Insurance Fund
+  nssf: number; // National Social Security Fund
+  housing: number; // Housing levy (1.5% of gross salary)
   other: number;
   total: number;
 }
@@ -238,7 +246,10 @@ export interface PayslipYTDTotals {
   grossEarnings: number;
   totalDeductions: number;
   netPay: number;
-  taxPaid: number;
+  payeTaxPaid: number;
+  nhifPaid: number;
+  nssfPaid: number;
+  housingLevyPaid: number;
 }
 
 // Reporting Types
@@ -254,11 +265,16 @@ export interface PayrollReport {
 
 export enum ReportType {
   PAYROLL_SUMMARY = 'payroll_summary',
-  TAX_REPORT = 'tax_report',
+  PAYE_REPORT = 'paye_report', // For KRA submissions
+  NHIF_REPORT = 'nhif_report',
+  NSSF_REPORT = 'nssf_report',
+  HOUSING_LEVY_REPORT = 'housing_levy_report',
   PENSION_REPORT = 'pension_report',
   LEAVE_REPORT = 'leave_report',
   EMPLOYEE_COST = 'employee_cost',
-  DEPARTMENT_ANALYSIS = 'department_analysis'
+  DEPARTMENT_ANALYSIS = 'department_analysis',
+  P9_FORM = 'p9_form', // Kenya tax deduction card
+  P10_FORM = 'p10_form' // Kenya employer's return
 }
 
 // Audit Log Types
