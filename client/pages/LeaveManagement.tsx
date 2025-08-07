@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { logLeaveAction } from '@shared/audit-service';
+import { AuditAction } from '@shared/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -437,19 +439,61 @@ export default function LeaveManagement() {
 
     // Remove from pending approvals
     setPendingApprovals(prev => prev.filter(r => r.id !== requestId));
-    
+
+    // Log audit entry for leave approval
+    logLeaveAction(
+      {
+        userId: user?.id || 'unknown',
+        userAgent: navigator.userAgent,
+        ipAddress: '127.0.0.1' // In production, get from server
+      },
+      AuditAction.APPROVE,
+      requestId,
+      { status: LeaveStatus.PENDING },
+      {
+        status: LeaveStatus.APPROVED,
+        approvedBy: user?.email,
+        approvedAt: updatedRequest.approvedAt,
+        leaveType: request.leaveType,
+        daysRequested: request.daysRequested
+      }
+    );
+
     alert('Leave request approved successfully!');
   };
 
   const handleRejectLeave = async (requestId: string) => {
-    setPendingApprovals(prev => 
-      prev.map(request => 
-        request.id === requestId 
-          ? { ...request, status: LeaveStatus.REJECTED, rejectionReason: 'Manager discretion' }
-          : request
+    const request = pendingApprovals.find(r => r.id === requestId);
+
+    setPendingApprovals(prev =>
+      prev.map(req =>
+        req.id === requestId
+          ? { ...req, status: LeaveStatus.REJECTED, rejectionReason: 'Manager discretion' }
+          : req
       ).filter(r => r.status === LeaveStatus.PENDING)
     );
-    
+
+    // Log audit entry for leave rejection
+    if (request) {
+      logLeaveAction(
+        {
+          userId: user?.id || 'unknown',
+          userAgent: navigator.userAgent,
+          ipAddress: '127.0.0.1' // In production, get from server
+        },
+        AuditAction.REJECT,
+        requestId,
+        { status: LeaveStatus.PENDING },
+        {
+          status: LeaveStatus.REJECTED,
+          rejectedBy: user?.email,
+          rejectionReason: 'Manager discretion',
+          leaveType: request.leaveType,
+          daysRequested: request.daysRequested
+        }
+      );
+    }
+
     alert('Leave request rejected.');
   };
 
