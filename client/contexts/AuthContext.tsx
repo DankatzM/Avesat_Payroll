@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     setIsLoading(false);
   };
 
-  const login = async (credentials: LoginRequest): Promise<boolean> => {
+  const login = async (credentials: LoginRequest): Promise<{ success: boolean; redirectUrl?: string }> => {
     try {
       const response = await fetch('/api/auth/login', {
         method: 'POST',
@@ -77,8 +77,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       if (response.ok) {
-        const authData: AuthResponse = await response.json();
+        const authData: AuthResponse & { permissions?: UserPermissions; redirectUrl?: string } = await response.json();
         setUser(authData.user);
+        setPermissions(authData.permissions || null);
         localStorage.setItem('authToken', authData.token);
         localStorage.setItem('refreshToken', authData.refreshToken);
 
@@ -92,13 +93,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           AuditAction.LOGIN
         );
 
-        return true;
+        console.log(`[AUTH CLIENT] Login successful, redirecting to: ${authData.redirectUrl}`);
+
+        return { success: true, redirectUrl: authData.redirectUrl };
       } else {
-        return false;
+        return { success: false };
       }
     } catch (error) {
       console.error('Login failed:', error);
-      return false;
+      return { success: false };
     }
   };
 
@@ -116,6 +119,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     }
 
     setUser(null);
+    setPermissions(null);
     localStorage.removeItem('authToken');
     localStorage.removeItem('refreshToken');
   };
