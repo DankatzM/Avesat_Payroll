@@ -57,6 +57,7 @@ interface EmployeeFormData {
   lastName: string;
   email: string;
   phone: string;
+  nationalId: string; // Kenya National ID
   address: string;
   dateOfBirth: string;
   hireDate: string;
@@ -68,10 +69,21 @@ interface EmployeeFormData {
   accountNumber: string;
   sortCode: string;
   accountHolderName: string;
-  taxNumber: string;
+  kraPin: string; // Kenya Revenue Authority PIN
   taxCode: string;
-  isStudentLoan: boolean;
+  nhifNumber: string;
+  nssfNumber: string;
   pensionContribution: number;
+}
+
+interface ValidationErrors {
+  [key: string]: string;
+}
+
+interface EmployeeCredentials {
+  employeeId: string;
+  email: string;
+  temporaryPassword: string;
 }
 
 export default function Employees() {
@@ -83,15 +95,20 @@ export default function Employees() {
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [validationErrors, setValidationErrors] = useState<ValidationErrors>({});
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+  const [newEmployeeCredentials, setNewEmployeeCredentials] = useState<EmployeeCredentials | null>(null);
 
   const [formData, setFormData] = useState<EmployeeFormData>({
     firstName: '',
     lastName: '',
     email: '',
     phone: '',
+    nationalId: '',
     address: '',
     dateOfBirth: '',
-    hireDate: '',
+    hireDate: new Date().toISOString().split('T')[0], // Default to today
     position: '',
     department: '',
     salary: 0,
@@ -100,10 +117,11 @@ export default function Employees() {
     accountNumber: '',
     sortCode: '',
     accountHolderName: '',
-    taxNumber: '',
-    taxCode: '',
-    isStudentLoan: false,
-    pensionContribution: 0,
+    kraPin: '',
+    taxCode: 'T1', // Default tax code
+    nhifNumber: '',
+    nssfNumber: '',
+    pensionContribution: 5, // Default 5%
   });
 
   useEffect(() => {
@@ -240,9 +258,10 @@ export default function Employees() {
       lastName: '',
       email: '',
       phone: '',
+      nationalId: '',
       address: '',
       dateOfBirth: '',
-      hireDate: '',
+      hireDate: new Date().toISOString().split('T')[0],
       position: '',
       department: '',
       salary: 0,
@@ -251,24 +270,167 @@ export default function Employees() {
       accountNumber: '',
       sortCode: '',
       accountHolderName: '',
-      taxNumber: '',
-      taxCode: '',
-      isStudentLoan: false,
-      pensionContribution: 0,
+      kraPin: '',
+      taxCode: 'T1',
+      nhifNumber: '',
+      nssfNumber: '',
+      pensionContribution: 5,
     });
+    setValidationErrors({});
+    setNewEmployeeCredentials(null);
+    setShowSuccessMessage(false);
+  };
+
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validateKenyanNationalId = (id: string): boolean => {
+    // Kenyan National ID format: 8 digits
+    const idRegex = /^\d{8}$/;
+    return idRegex.test(id);
+  };
+
+  const validateKenyanPhone = (phone: string): boolean => {
+    // Kenyan phone format: +254 followed by 9 digits or 07/01 followed by 8 digits
+    const phoneRegex = /^(\+254\d{9}|0[17]\d{8})$/;
+    return phoneRegex.test(phone.replace(/\s+/g, ''));
+  };
+
+  const validateKraPin = (pin: string): boolean => {
+    // KRA PIN format: Letter + 9 digits + Letter
+    const pinRegex = /^[A-Z]\d{9}[A-Z]$/;
+    return pinRegex.test(pin.toUpperCase());
+  };
+
+  const checkForDuplicates = (email: string, nationalId: string): { isDuplicate: boolean; field: string } => {
+    const duplicateEmail = employees.find(emp =>
+      emp.email.toLowerCase() === email.toLowerCase() && emp.id !== editingEmployee?.id
+    );
+
+    const duplicateNationalId = employees.find(emp =>
+      emp.nationalId === nationalId && emp.id !== editingEmployee?.id
+    );
+
+    if (duplicateEmail) return { isDuplicate: true, field: 'email' };
+    if (duplicateNationalId) return { isDuplicate: true, field: 'nationalId' };
+
+    return { isDuplicate: false, field: '' };
+  };
+
+  const generateEmployeeCredentials = (): EmployeeCredentials => {
+    const employeeId = `EMP${String(employees.length + 1).padStart(3, '0')}`;
+    const email = `${formData.firstName.toLowerCase()}.${formData.lastName.toLowerCase()}@company.co.ke`;
+    const temporaryPassword = `Temp${Math.random().toString(36).substring(2, 8)}!`;
+
+    return { employeeId, email, temporaryPassword };
+  };
+
+  const validateForm = (): boolean => {
+    const errors: ValidationErrors = {};
+
+    // Required field validation
+    if (!formData.firstName.trim()) errors.firstName = 'First name is required';
+    if (!formData.lastName.trim()) errors.lastName = 'Last name is required';
+    if (!formData.email.trim()) errors.email = 'Email is required';
+    if (!formData.phone.trim()) errors.phone = 'Phone number is required';
+    if (!formData.nationalId.trim()) errors.nationalId = 'National ID is required';
+    if (!formData.position.trim()) errors.position = 'Position is required';
+    if (!formData.department.trim()) errors.department = 'Department is required';
+    if (!formData.salary || formData.salary <= 0) errors.salary = 'Valid salary is required';
+    if (!formData.dateOfBirth) errors.dateOfBirth = 'Date of birth is required';
+    if (!formData.hireDate) errors.hireDate = 'Hire date is required';
+    if (!formData.bankName.trim()) errors.bankName = 'Bank name is required';
+    if (!formData.accountNumber.trim()) errors.accountNumber = 'Account number is required';
+    if (!formData.sortCode.trim()) errors.sortCode = 'Bank code is required';
+    if (!formData.accountHolderName.trim()) errors.accountHolderName = 'Account holder name is required';
+    if (!formData.kraPin.trim()) errors.kraPin = 'KRA PIN is required';
+
+    // Format validation
+    if (formData.email && !validateEmail(formData.email)) {
+      errors.email = 'Please enter a valid email address';
+    }
+
+    if (formData.nationalId && !validateKenyanNationalId(formData.nationalId)) {
+      errors.nationalId = 'Please enter a valid 8-digit Kenyan National ID';
+    }
+
+    if (formData.phone && !validateKenyanPhone(formData.phone)) {
+      errors.phone = 'Please enter a valid Kenyan phone number (+254XXXXXXXXX or 07XXXXXXXX/01XXXXXXXX)';
+    }
+
+    if (formData.kraPin && !validateKraPin(formData.kraPin)) {
+      errors.kraPin = 'Please enter a valid KRA PIN (format: A123456789B)';
+    }
+
+    // Age validation (must be at least 18)
+    if (formData.dateOfBirth) {
+      const birthDate = new Date(formData.dateOfBirth);
+      const today = new Date();
+      const age = today.getFullYear() - birthDate.getFullYear();
+      const monthDiff = today.getMonth() - birthDate.getMonth();
+
+      if (age < 18 || (age === 18 && monthDiff < 0)) {
+        errors.dateOfBirth = 'Employee must be at least 18 years old';
+      }
+    }
+
+    // Hire date validation (not in the future)
+    if (formData.hireDate) {
+      const hireDate = new Date(formData.hireDate);
+      const today = new Date();
+      today.setHours(23, 59, 59, 999); // End of today
+
+      if (hireDate > today) {
+        errors.hireDate = 'Hire date cannot be in the future';
+      }
+    }
+
+    // Salary validation (reasonable range for Kenya)
+    if (formData.salary && (formData.salary < 10000 || formData.salary > 10000000)) {
+      errors.salary = 'Salary must be between KES 10,000 and KES 10,000,000';
+    }
+
+    // Check for duplicates
+    const duplicateCheck = checkForDuplicates(formData.email, formData.nationalId);
+    if (duplicateCheck.isDuplicate) {
+      if (duplicateCheck.field === 'email') {
+        errors.email = 'An employee with this email already exists';
+      }
+      if (duplicateCheck.field === 'nationalId') {
+        errors.nationalId = 'An employee with this National ID already exists';
+      }
+    }
+
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!validateForm()) {
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
+      // Generate credentials for new employee
+      const credentials = editingEmployee ? null : generateEmployeeCredentials();
+
       // In real app, make API call
       console.log('Submitting employee data:', formData);
-      
+
       // Mock success
       const newEmployee: Employee = {
-        id: Date.now().toString(),
-        employeeNumber: `EMP${String(employees.length + 1).padStart(3, '0')}`,
+        id: editingEmployee?.id || Date.now().toString(),
+        employeeNumber: editingEmployee?.employeeNumber || credentials!.employeeId,
+        nationalId: formData.nationalId,
         ...formData,
+        email: credentials?.email || formData.email,
         bankDetails: {
           bankName: formData.bankName,
           accountNumber: formData.accountNumber,
@@ -276,21 +438,34 @@ export default function Employees() {
           accountHolderName: formData.accountHolderName,
         },
         taxInformation: {
-          taxNumber: formData.taxNumber,
+          kraPin: formData.kraPin,
           taxCode: formData.taxCode,
-          isStudentLoan: formData.isStudentLoan,
+          nhifNumber: formData.nhifNumber,
+          nssfNumber: formData.nssfNumber,
           pensionContribution: formData.pensionContribution,
         },
         isActive: true,
-        createdAt: new Date().toISOString(),
+        createdAt: editingEmployee?.createdAt || new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       };
-      
-      setEmployees([...employees, newEmployee]);
-      setIsAddDialogOpen(false);
+
+      if (editingEmployee) {
+        // Update existing employee
+        setEmployees(employees.map(emp => emp.id === editingEmployee.id ? newEmployee : emp));
+        setIsEditDialogOpen(false);
+      } else {
+        // Add new employee
+        setEmployees([...employees, newEmployee]);
+        setNewEmployeeCredentials(credentials!);
+        setShowSuccessMessage(true);
+        setIsAddDialogOpen(false);
+      }
+
       resetForm();
     } catch (error) {
       console.error('Failed to create employee:', error);
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -382,10 +557,29 @@ export default function Employees() {
             <Label htmlFor="phone">Phone</Label>
             <Input
               id="phone"
+              placeholder="+254 712 345 678 or 0712 345 678"
               value={formData.phone}
               onChange={(e) => setFormData({...formData, phone: e.target.value})}
+              className={validationErrors.phone ? 'border-red-500' : ''}
               required
             />
+            {validationErrors.phone && (
+              <p className="text-sm text-red-600">{validationErrors.phone}</p>
+            )}
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nationalId">National ID</Label>
+            <Input
+              id="nationalId"
+              placeholder="12345678"
+              value={formData.nationalId}
+              onChange={(e) => setFormData({...formData, nationalId: e.target.value})}
+              className={validationErrors.nationalId ? 'border-red-500' : ''}
+              required
+            />
+            {validationErrors.nationalId && (
+              <p className="text-sm text-red-600">{validationErrors.nationalId}</p>
+            )}
           </div>
           <div className="space-y-2 md:col-span-2">
             <Label htmlFor="address">Address</Label>
@@ -525,13 +719,18 @@ export default function Employees() {
         <h3 className="text-lg font-medium">Tax Information</h3>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="taxNumber">KRA PIN</Label>
+            <Label htmlFor="kraPin">KRA PIN</Label>
             <Input
-              id="taxNumber"
-              value={formData.taxNumber}
-              onChange={(e) => setFormData({...formData, taxNumber: e.target.value})}
+              id="kraPin"
+              placeholder="A123456789B"
+              value={formData.kraPin}
+              onChange={(e) => setFormData({...formData, kraPin: e.target.value.toUpperCase()})}
+              className={validationErrors.kraPin ? 'border-red-500' : ''}
               required
             />
+            {validationErrors.kraPin && (
+              <p className="text-sm text-red-600">{validationErrors.kraPin}</p>
+            )}
           </div>
           <div className="space-y-2">
             <Label htmlFor="taxCode">Tax Code</Label>
@@ -543,12 +742,30 @@ export default function Employees() {
             />
           </div>
           <div className="space-y-2">
+            <Label htmlFor="nhifNumber">NHIF Number (Optional)</Label>
+            <Input
+              id="nhifNumber"
+              placeholder="NHIF123456"
+              value={formData.nhifNumber}
+              onChange={(e) => setFormData({...formData, nhifNumber: e.target.value})}
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="nssfNumber">NSSF Number (Optional)</Label>
+            <Input
+              id="nssfNumber"
+              placeholder="NSSF789012"
+              value={formData.nssfNumber}
+              onChange={(e) => setFormData({...formData, nssfNumber: e.target.value})}
+            />
+          </div>
+          <div className="space-y-2">
             <Label htmlFor="pensionContribution">Pension Contribution (%)</Label>
             <Input
               id="pensionContribution"
               type="number"
               min="0"
-              max="100"
+              max="20"
               step="0.1"
               value={formData.pensionContribution}
               onChange={(e) => setFormData({...formData, pensionContribution: Number(e.target.value)})}
@@ -570,8 +787,19 @@ export default function Employees() {
         >
           Cancel
         </Button>
-        <Button type="submit" className="bg-indigo-600 hover:bg-indigo-700">
-          {editingEmployee ? 'Update Employee' : 'Add Employee'}
+        <Button
+          type="submit"
+          className="bg-indigo-600 hover:bg-indigo-700"
+          disabled={isSubmitting}
+        >
+          {isSubmitting ? (
+            <div className="flex items-center">
+              <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+              {editingEmployee ? 'Updating...' : 'Creating...'}
+            </div>
+          ) : (
+            editingEmployee ? 'Update Employee' : 'Add Employee'
+          )}
         </Button>
       </div>
     </form>
