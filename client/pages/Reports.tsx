@@ -1031,8 +1031,8 @@ export default function Reports() {
                       <TableRow key={report.id}>
                         <TableCell className="font-medium">{report.title}</TableCell>
                         <TableCell>
-                          {report.filters.month ? 
-                            `${report.filters.month}/${report.filters.year}` : 
+                          {report.filters.month && report.filters.month !== 'all' ?
+                            `${report.filters.month}/${report.filters.year}` :
                             report.filters.year
                           }
                         </TableCell>
