@@ -47,6 +47,7 @@ export interface Employee {
   lastName: string;
   email: string;
   phone: string;
+  nationalId: string; // Kenya National ID
   address: string;
   dateOfBirth: string;
   hireDate: string;
