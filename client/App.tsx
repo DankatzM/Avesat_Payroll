@@ -15,6 +15,7 @@ import Payroll from "./pages/Payroll";
 import TaxManagement from "./pages/TaxManagement";
 import LeaveManagement from "./pages/LeaveManagement";
 import Payslips from "./pages/Payslips";
+import Reports from "./pages/Reports";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
