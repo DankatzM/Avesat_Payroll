@@ -697,42 +697,50 @@ export default function Reports() {
               <CardTitle>Step 1: Select Report Type</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {reportTypes.map((reportType) => (
-                  <Card
-                    key={reportType.id}
-                    className={`cursor-pointer border-2 transition-colors ${
-                      selectedReportType === reportType.id
-                        ? 'border-indigo-500 bg-indigo-50'
-                        : 'border-gray-200 hover:border-gray-300'
-                    }`}
-                    onClick={() => setSelectedReportType(reportType.id)}
-                  >
-                    <CardContent className="p-4">
-                      <div className="flex items-start space-x-3">
-                        <div className="flex-shrink-0 mt-1 text-indigo-600">
-                          {reportType.icon}
-                        </div>
+              <div className="space-y-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="reportType">Report Type</Label>
+                    <Select value={selectedReportType} onValueChange={setSelectedReportType}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a report type" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {reportTypes.map((reportType) => (
+                          <SelectItem key={reportType.id} value={reportType.id}>
+                            <div className="flex items-center space-x-2">
+                              <span className="text-indigo-600">{reportType.icon}</span>
+                              <span>{reportType.name}</span>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                {/* Show selected report details */}
+                {selectedReportType && (
+                  <div className="mt-4 p-4 bg-gray-50 rounded-lg">
+                    {(() => {
+                      const reportType = reportTypes.find(rt => rt.id === selectedReportType);
+                      return reportType ? (
                         <div>
-                          <h4 className="font-medium text-gray-900">{reportType.name}</h4>
-                          <p className="text-sm text-gray-600 mt-1">{reportType.description}</p>
-                          <div className="flex flex-wrap gap-1 mt-2">
-                            {reportType.fields.slice(0, 3).map((field, index) => (
+                          <h4 className="font-medium text-gray-900 mb-2">{reportType.name}</h4>
+                          <p className="text-sm text-gray-600 mb-3">{reportType.description}</p>
+                          <div className="flex flex-wrap gap-1">
+                            <span className="text-sm font-medium text-gray-700 mr-2">Fields included:</span>
+                            {reportType.fields.map((field, index) => (
                               <Badge key={index} variant="outline" className="text-xs">
                                 {field}
                               </Badge>
                             ))}
-                            {reportType.fields.length > 3 && (
-                              <Badge variant="outline" className="text-xs">
-                                +{reportType.fields.length - 3} more
-                              </Badge>
-                            )}
                           </div>
                         </div>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
+                      ) : null;
+                    })()}
+                  </div>
+                )}
               </div>
             </CardContent>
           </Card>
