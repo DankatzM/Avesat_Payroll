@@ -13,6 +13,7 @@ import { AuthenticationStep } from '@shared/auth-service';
 
 export default function Login() {
   const { login, isAuthenticated, isLoading } = useAuth();
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
