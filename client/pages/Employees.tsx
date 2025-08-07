@@ -1,5 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { logEmployeeAction } from '@shared/audit-service';
+import { AuditAction } from '@shared/api';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -454,11 +456,59 @@ export default function Employees() {
 
       if (editingEmployee) {
         // Update existing employee
+        const oldEmployee = editingEmployee;
         setEmployees(employees.map(emp => emp.id === editingEmployee.id ? newEmployee : emp));
+
+        // Log audit entry for employee update
+        logEmployeeAction(
+          {
+            userId: user?.id || 'unknown',
+            userAgent: navigator.userAgent,
+            ipAddress: '127.0.0.1' // In production, get from server
+          },
+          AuditAction.UPDATE,
+          newEmployee.id,
+          {
+            firstName: oldEmployee.firstName,
+            lastName: oldEmployee.lastName,
+            position: oldEmployee.position,
+            department: oldEmployee.department,
+            salary: oldEmployee.salary
+          },
+          {
+            firstName: newEmployee.firstName,
+            lastName: newEmployee.lastName,
+            position: newEmployee.position,
+            department: newEmployee.department,
+            salary: newEmployee.salary
+          }
+        );
+
         setIsEditDialogOpen(false);
       } else {
         // Add new employee
         setEmployees([...employees, newEmployee]);
+
+        // Log audit entry for employee creation
+        logEmployeeAction(
+          {
+            userId: user?.id || 'unknown',
+            userAgent: navigator.userAgent,
+            ipAddress: '127.0.0.1' // In production, get from server
+          },
+          AuditAction.CREATE,
+          newEmployee.id,
+          undefined,
+          {
+            firstName: newEmployee.firstName,
+            lastName: newEmployee.lastName,
+            position: newEmployee.position,
+            department: newEmployee.department,
+            salary: newEmployee.salary,
+            employeeNumber: newEmployee.employeeNumber
+          }
+        );
+
         setNewEmployeeCredentials(credentials!);
         setShowSuccessMessage(true);
         setIsAddDialogOpen(false);
@@ -501,8 +551,32 @@ export default function Employees() {
   const handleDelete = async (employeeId: string) => {
     if (confirm('Are you sure you want to delete this employee?')) {
       try {
+        // Get employee data before deletion for audit
+        const employeeToDelete = employees.find(emp => emp.id === employeeId);
+
         // In real app, make API call
         setEmployees(employees.filter(emp => emp.id !== employeeId));
+
+        // Log audit entry for employee deletion
+        if (employeeToDelete) {
+          logEmployeeAction(
+            {
+              userId: user?.id || 'unknown',
+              userAgent: navigator.userAgent,
+              ipAddress: '127.0.0.1' // In production, get from server
+            },
+            AuditAction.DELETE,
+            employeeId,
+            {
+              firstName: employeeToDelete.firstName,
+              lastName: employeeToDelete.lastName,
+              position: employeeToDelete.position,
+              department: employeeToDelete.department,
+              employeeNumber: employeeToDelete.employeeNumber
+            },
+            undefined
+          );
+        }
       } catch (error) {
         console.error('Failed to delete employee:', error);
       }
