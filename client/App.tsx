@@ -81,7 +81,7 @@ const App = () => (
               path="/payroll"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Payroll Processing" />
+                  <Payroll />
                 </ProtectedRoute>
               }
             />
