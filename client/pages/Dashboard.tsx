@@ -31,16 +31,16 @@ export default function Dashboard() {
 
   const fetchDashboardData = async () => {
     try {
-      // Mock data for demonstration
+      // Mock data for demonstration - Kenya focused
       setStats({
         totalEmployees: 247,
         activeEmployees: 238,
-        totalPayroll: 1250000,
+        totalPayroll: 125000000, // KES 125 million
         pendingPayrolls: 3,
         pendingLeaveRequests: 12,
         upcomingPayments: 8,
-        monthlyTaxLiability: 275000,
-        pensionContributions: 95000,
+        monthlyTaxLiability: 27500000, // KES 27.5 million
+        pensionContributions: 9500000, // KES 9.5 million
       });
 
       setRecentActivity([
@@ -49,28 +49,28 @@ export default function Dashboard() {
           type: 'payroll',
           description: 'Payroll for March 2024 has been processed',
           timestamp: '2024-03-15T10:30:00Z',
-          user: 'Sarah Johnson',
+          user: 'Grace Wanjiku',
         },
         {
           id: '2',
           type: 'employee',
-          description: 'New employee John Doe has been registered',
+          description: 'New employee John Mwangi has been registered',
           timestamp: '2024-03-15T09:15:00Z',
-          user: 'Mike Chen',
+          user: 'Peter Kiprotich',
         },
         {
           id: '3',
           type: 'leave',
-          description: 'Leave request approved for Emily Davis',
+          description: 'Leave request approved for Mary Achieng',
           timestamp: '2024-03-15T08:45:00Z',
-          user: 'Sarah Johnson',
+          user: 'Grace Wanjiku',
         },
         {
           id: '4',
           type: 'tax',
           description: 'PAYE tax calculation completed for Q1 2024',
           timestamp: '2024-03-14T16:20:00Z',
-          user: 'David Wilson',
+          user: 'Samuel Otieno',
         },
       ]);
     } catch (error) {
@@ -81,9 +81,9 @@ export default function Dashboard() {
   };
 
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat('en-KE', {
       style: 'currency',
-      currency: 'USD',
+      currency: 'KES',
     }).format(amount);
   };
 
@@ -169,7 +169,7 @@ export default function Dashboard() {
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats?.totalPayroll || 0)}</div>
             <p className="text-xs text-muted-foreground">
-              <span className="text-green-600">+12.5%</span> from last month
+              <span className="text-green-600">+8.2%</span> from last month
             </p>
           </CardContent>
         </Card>
@@ -189,13 +189,13 @@ export default function Dashboard() {
 
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium">Tax Liability</CardTitle>
+            <CardTitle className="text-sm font-medium">PAYE Liability</CardTitle>
             <TrendingUp className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{formatCurrency(stats?.monthlyTaxLiability || 0)}</div>
             <p className="text-xs text-muted-foreground">
-              Monthly PAYE obligation
+              Monthly PAYE obligation to KRA
             </p>
           </CardContent>
         </Card>
