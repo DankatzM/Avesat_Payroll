@@ -117,7 +117,7 @@ const App = () => (
               path="/reports"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Reports & Analytics" />
+                  <Reports />
                 </ProtectedRoute>
               }
             />
