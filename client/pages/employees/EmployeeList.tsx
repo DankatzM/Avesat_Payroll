@@ -471,12 +471,12 @@ export default function EmployeeList() {
   const canManageEmployees = hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER]);
   const canViewEmployees = hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.PAYROLL_OFFICER, UserRole.MANAGER]);
 
-  // Load data on mount
+  // Initialize data on mount
   useEffect(() => {
     if (canViewEmployees) {
-      loadEmployees();
+      initializeStatistics();
     }
-  }, [canViewEmployees]);
+  }, [canViewEmployees, employees]);
 
   if (!canViewEmployees) {
     return (
