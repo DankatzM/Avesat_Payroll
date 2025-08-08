@@ -653,23 +653,38 @@ const App = () => (
 // Create root only once and handle hot module replacement
 const container = document.getElementById("root")!;
 
+// Store root instance globally to persist across HMR
+declare global {
+  interface Window {
+    __appRoot?: any;
+  }
+}
+
 // Check if we're in development and handle HMR
 if (import.meta.hot) {
-  // In development with HMR, we need to handle re-renders differently
-  let root: any;
-  
+  // In development with HMR, reuse existing root or create new one
   const renderApp = () => {
-    if (!root) {
-      root = createRoot(container);
+    if (!window.__appRoot) {
+      // Clear container content before creating new root
+      container.innerHTML = '';
+      window.__appRoot = createRoot(container);
     }
-    root.render(<App />);
+    window.__appRoot.render(<App />);
   };
-  
+
   renderApp();
-  
+
   // Accept HMR updates
   import.meta.hot.accept(() => {
     renderApp();
+  });
+
+  // Clean up on dispose (when HMR removes this module)
+  import.meta.hot.dispose(() => {
+    if (window.__appRoot) {
+      window.__appRoot.unmount();
+      window.__appRoot = undefined;
+    }
   });
 } else {
   // In production, create root normally
