@@ -296,38 +296,33 @@ export default function EmployeeList() {
     averageSalary: 0
   });
 
-  // Load employees
-  const loadEmployees = async () => {
-    try {
-      setLoading(true);
-      setError(null);
-      LoadingManager.start('employee-list');
-      
-      const employeeData = await employeeService.getEmployees();
-      setEmployees(employeeData);
-      setFilteredEmployees(employeeData);
-      
-      // Calculate statistics
-      const activeEmployees = employeeData.filter(emp => emp.isActive);
-      const departments = new Set(employeeData.map(emp => emp.department));
-      const totalSalary = employeeData.reduce((sum, emp) => sum + emp.salary, 0);
-      
-      setStatistics({
-        total: employeeData.length,
-        active: activeEmployees.length,
-        inactive: employeeData.length - activeEmployees.length,
-        departments: departments.size,
-        averageSalary: employeeData.length > 0 ? totalSalary / employeeData.length : 0
-      });
-      
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      setError(errorMessage);
-      console.error('Error loading employees:', err);
-    } finally {
+  // Initialize statistics from mock data
+  const initializeStatistics = () => {
+    const activeEmployees = employees.filter(emp => emp.isActive);
+    const departments = new Set(employees.map(emp => emp.department));
+    const totalSalary = employees.reduce((sum, emp) => sum + emp.salary, 0);
+
+    setStatistics({
+      total: employees.length,
+      active: activeEmployees.length,
+      inactive: employees.length - activeEmployees.length,
+      departments: departments.size,
+      averageSalary: employees.length > 0 ? totalSalary / employees.length : 0
+    });
+
+    setFilteredEmployees(employees);
+  };
+
+  // Mock refresh function for UI consistency
+  const loadEmployees = () => {
+    setLoading(true);
+    setError(null);
+
+    // Simulate API delay
+    setTimeout(() => {
+      initializeStatistics();
       setLoading(false);
-      LoadingManager.stop('employee-list');
-    }
+    }, 500);
   };
 
   // Filter and sort employees
