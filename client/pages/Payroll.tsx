@@ -308,7 +308,9 @@ export default function Payroll() {
   };
 
   const processPayroll = async () => {
-    if (!selectedBatch || !selectedMonth || !selectedYear) return;
+    if (!selectedMonth || !selectedYear) return;
+    if (processingMode === 'batch' && !selectedBatch) return;
+    if (processingMode === 'single' && !selectedEmployee) return;
     
     setIsProcessing(true);
     setCurrentStep(2);
