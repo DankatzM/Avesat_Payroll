@@ -57,10 +57,7 @@ import {
   Filter as FilterIcon
 } from 'lucide-react';
 import { Employee, PayrollCategory, UserRole } from '@shared/api';
-import { employeeService, handleAPIError, LoadingManager } from '@shared/data-service';
 import { formatKES } from '@shared/kenya-tax';
-import { logEmployeeAction } from '@shared/audit-service';
-import { AuditAction } from '@shared/api';
 
 type ViewMode = 'table' | 'grid';
 type SortField = 'name' | 'department' | 'position' | 'salary' | 'hireDate';
