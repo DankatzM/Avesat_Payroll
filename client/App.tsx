@@ -24,9 +24,10 @@ import Settings from "./pages/Settings";
 // Dashboard Sub-modules
 import Analytics from "./pages/dashboard/Analytics";
 
-// Employee Sub-modules  
+// Employee Sub-modules
 import AddEmployee from "./pages/employees/AddEmployee";
 import BulkImport from "./pages/employees/BulkImport";
+import EmployeeList from "./pages/employees/EmployeeList";
 
 // Payroll Sub-modules
 import PayrollCalendar from "./pages/payroll/Calendar";
