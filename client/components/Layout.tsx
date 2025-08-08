@@ -53,6 +53,12 @@ const navigationItems = [
     roles: [UserRole.ADMIN, UserRole.PAYROLL_OFFICER],
   },
   {
+    name: 'Employee Deductions',
+    href: '/deductions',
+    icon: ClipboardList,
+    roles: [UserRole.ADMIN, UserRole.PAYROLL_OFFICER, UserRole.HR_MANAGER],
+  },
+  {
     name: 'Leave Management',
     href: '/leave',
     icon: Calendar,
