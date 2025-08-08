@@ -33,6 +33,7 @@ import EmployeeReports from "./pages/employees/EmployeeReports";
 
 // Payroll Sub-modules
 import PayrollCalendar from "./pages/payroll/Calendar";
+import SalaryStructure from "./pages/payroll/SalaryStructure";
 
 import NotFound from "./pages/NotFound";
 
