@@ -515,11 +515,11 @@ export default function Payroll() {
               <CardHeader>
                 <CardTitle className="flex items-center">
                   <Calendar className="mr-2 h-5 w-5" />
-                  Step 1: Select Payroll Period and Employee Batch
+                  Step 1: Select Payroll Period and Processing Mode
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-6">
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                   <div className="space-y-2">
                     <Label>Payroll Month</Label>
                     <Select value={selectedMonth} onValueChange={setSelectedMonth}>
@@ -547,54 +547,123 @@ export default function Payroll() {
                       </SelectContent>
                     </Select>
                   </div>
-                </div>
-
-                <div className="space-y-4">
-                  <Label>Employee Batch</Label>
-                  <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {availableBatches.map(batch => (
-                      <Card
-                        key={batch.id}
-                        className={`cursor-pointer border-2 transition-colors ${
-                          selectedBatch?.id === batch.id
-                            ? 'border-indigo-500 bg-indigo-50'
-                            : 'border-gray-200 hover:border-gray-300'
-                        }`}
-                        onClick={() => setSelectedBatch(batch)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center justify-between">
-                            <div>
-                              <h4 className="font-medium">{batch.name}</h4>
-                              <p className="text-sm text-gray-600">
-                                {batch.employeeCount} employees
-                              </p>
-                              {batch.department && (
-                                <Badge variant="outline" className="mt-1">
-                                  {batch.department}
-                                </Badge>
-                              )}
-                              {batch.payGroup && (
-                                <Badge variant="outline" className="mt-1">
-                                  {batch.payGroup}
-                                </Badge>
-                              )}
-                            </div>
-                            <Users className="h-5 w-5 text-gray-400" />
-                          </div>
-                        </CardContent>
-                      </Card>
-                    ))}
+                  <div className="space-y-2">
+                    <Label>Processing Mode</Label>
+                    <Select value={processingMode} onValueChange={(value: 'batch' | 'single') => {
+                      setProcessingMode(value);
+                      setSelectedBatch(null);
+                      setSelectedEmployee(null);
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="batch">Batch Processing</SelectItem>
+                        <SelectItem value="single">Single Employee</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
 
+                {processingMode === 'batch' && (
+                  <div className="space-y-4">
+                    <Label>Employee Batch</Label>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                      {availableBatches.map(batch => (
+                        <Card
+                          key={batch.id}
+                          className={`cursor-pointer border-2 transition-colors ${
+                            selectedBatch?.id === batch.id
+                              ? 'border-indigo-500 bg-indigo-50'
+                              : 'border-gray-200 hover:border-gray-300'
+                          }`}
+                          onClick={() => setSelectedBatch(batch)}
+                        >
+                          <CardContent className="p-4">
+                            <div className="flex items-center justify-between">
+                              <div>
+                                <h4 className="font-medium">{batch.name}</h4>
+                                <p className="text-sm text-gray-600">
+                                  {batch.employeeCount} employees
+                                </p>
+                                {batch.department && (
+                                  <Badge variant="outline" className="mt-1">
+                                    {batch.department}
+                                  </Badge>
+                                )}
+                                {batch.payGroup && (
+                                  <Badge variant="outline" className="mt-1">
+                                    {batch.payGroup}
+                                  </Badge>
+                                )}
+                              </div>
+                              <Users className="h-5 w-5 text-gray-400" />
+                            </div>
+                          </CardContent>
+                        </Card>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {processingMode === 'single' && (
+                  <div className="space-y-4">
+                    <Label>Select Employee</Label>
+                    <Select value={selectedEmployee?.id || ''} onValueChange={(employeeId) => {
+                      const employee = employees.find(emp => emp.id === employeeId);
+                      setSelectedEmployee(employee || null);
+                    }}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Choose an employee" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {employees.map(employee => (
+                          <SelectItem key={employee.id} value={employee.id}>
+                            <div className="flex items-center space-x-2">
+                              <span>{employee.firstName} {employee.lastName}</span>
+                              <Badge variant="outline" className="text-xs">
+                                {employee.employeeNumber}
+                              </Badge>
+                            </div>
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+
+                    {selectedEmployee && (
+                      <Card className="bg-blue-50 border-blue-200">
+                        <CardContent className="p-4">
+                          <div className="flex items-center space-x-4">
+                            <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                              <span className="text-blue-600 font-medium">
+                                {selectedEmployee.firstName[0]}{selectedEmployee.lastName[0]}
+                              </span>
+                            </div>
+                            <div>
+                              <h4 className="font-medium">{selectedEmployee.firstName} {selectedEmployee.lastName}</h4>
+                              <p className="text-sm text-gray-600">{selectedEmployee.position} • {selectedEmployee.department}</p>
+                              <p className="text-sm font-medium">{selectedEmployee.employeeNumber}</p>
+                            </div>
+                          </div>
+                        </CardContent>
+                      </Card>
+                    )}
+                  </div>
+                )}
+
                 <Button
                   onClick={processPayroll}
-                  disabled={!selectedBatch || !selectedMonth || !selectedYear || isProcessing}
+                  disabled={
+                    !selectedMonth ||
+                    !selectedYear ||
+                    (processingMode === 'batch' && !selectedBatch) ||
+                    (processingMode === 'single' && !selectedEmployee) ||
+                    isProcessing
+                  }
                   className="w-full md:w-auto"
                 >
                   <Play className="mr-2 h-4 w-4" />
-                  Start Payroll Processing
+                  Start {processingMode === 'batch' ? 'Batch' : 'Single Employee'} Processing
                 </Button>
               </CardContent>
             </Card>
