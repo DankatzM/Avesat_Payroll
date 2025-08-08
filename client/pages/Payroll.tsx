@@ -710,10 +710,12 @@ export default function Payroll() {
                     <CheckCircle className="mr-2 h-4 w-4" />
                     Approve Payroll
                   </Button>
-                  <Button variant="outline" onClick={() => window.open('/payslips', '_self')}>
-                    <FileText className="mr-2 h-4 w-4" />
-                    Generate Payslips
-                  </Button>
+                  <Link to="/payslips">
+                    <Button variant="outline">
+                      <FileText className="mr-2 h-4 w-4" />
+                      Generate Payslips
+                    </Button>
+                  </Link>
                   <Button variant="outline" onClick={() => {
                     // Create and download CSV report
                     const csvData = currentRun.calculations.map(calc => ({
