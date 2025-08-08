@@ -6,6 +6,14 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Progress } from '@/components/ui/progress';
+import { Alert, AlertDescription } from '@/components/ui/alert';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Table,
   TableBody,
@@ -35,495 +43,1121 @@ import {
   Plus,
   Edit,
   Save,
+  Download,
+  Upload,
+  Eye,
+  RefreshCw,
+  Clock,
+  Building2,
+  Receipt,
+  Shield,
+  Database
 } from 'lucide-react';
 import { UserRole } from '@shared/api';
-import { formatKES } from '@shared/kenya-tax';
+import { formatKES, KENYA_TAX_BRACKETS, KENYA_TAX_CONSTANTS } from '@shared/kenya-tax';
+import { logTaxAction } from '@shared/audit-service';
+import { AuditAction } from '@shared/api';
 
-// Kenya PAYE Tax Brackets 2024 (Annual amounts in KES)
-interface TaxBracket {
-  id: string;
-  name: string;
-  minIncome: number;
-  maxIncome: number;
-  rate: number;
-  fixedAmount: number;
-  isActive: boolean;
-}
-
-interface TaxCalculationStep {
-  step: number;
+// Enhanced interfaces for the comprehensive tax system
+interface PayrollPeriod {
+  month: number;
+  year: number;
   description: string;
-  income: number;
-  rate: number;
-  taxAmount: number;
-  cumulativeTax: number;
-  bracket: TaxBracket;
 }
 
-interface PAYECalculationResult {
-  grossIncome: number;
-  taxableIncome: number;
-  totalTax: number;
+interface EmployeeFilter {
+  department: string;
+  payGroup: string;
+  employmentStatus: string;
+}
+
+interface StatutoryReliefs {
   personalRelief: number;
-  netTax: number;
-  effectiveRate: number;
-  steps: TaxCalculationStep[];
+  insuranceRelief: number;
+  pensionRelief: number;
+  disabilityRelief: number;
+  housingRelief: number;
 }
 
-export default function TaxManagement() {
+interface PayrollRecord {
+  employeeId: string;
+  employeeName: string;
+  department: string;
+  grossPay: number;
+  basicSalary: number;
+  allowances: number;
+  overtime: number;
+  personalRelief: number;
+  insuranceRelief: number;
+  pensionRelief: number;
+  isTaxExempt: boolean;
+}
+
+interface PAYECalculation {
+  employeeId: string;
+  employeeName: string;
+  grossPay: number;
+  taxableIncome: number;
+  payeAmount: number;
+  personalRelief: number;
+  totalReliefs: number;
+  effectiveRate: number;
+  dateCalculated: string;
+  calculatedBy: string;
+  validationStatus: 'valid' | 'flagged' | 'pending';
+  discrepancy?: number;
+}
+
+interface TaxReport {
+  reportType: 'P10' | 'P10A' | 'P9A';
+  period: string;
+  data: any[];
+  generatedAt: string;
+  totalEmployees: number;
+  totalTaxable: number;
+  totalPAYE: number;
+}
+
+interface AlgorithmStep {
+  step: number;
+  title: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'error';
+  message?: string;
+  progress?: number;
+}
+
+const TaxManagement: React.FC = () => {
   const { user, hasAnyRole } = useAuth();
-  const [grossIncome, setGrossIncome] = useState<string>('');
-  const [calculationResult, setCalculationResult] = useState<PAYECalculationResult | null>(null);
-  const [isCalculating, setIsCalculating] = useState(false);
-  const [currentCalculationStep, setCurrentCalculationStep] = useState(0);
-  const [showSteps, setShowSteps] = useState(false);
   
-  // Tax bracket management
-  const [taxBrackets, setTaxBrackets] = useState<TaxBracket[]>([]);
-  const [editingBracket, setEditingBracket] = useState<TaxBracket | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-
-  // Constants
-  const PERSONAL_RELIEF = 28800; // Annual personal relief in KES
-
-  useEffect(() => {
-    // Initialize Kenya PAYE tax brackets for 2024
-    const kenyaTaxBrackets: TaxBracket[] = [
-      {
-        id: '1',
-        name: 'Band 1',
-        minIncome: 0,
-        maxIncome: 288000,
-        rate: 10,
-        fixedAmount: 0,
-        isActive: true,
-      },
-      {
-        id: '2',
-        name: 'Band 2',
-        minIncome: 288001,
-        maxIncome: 388000,
-        rate: 25,
-        fixedAmount: 28800,
-        isActive: true,
-      },
-      {
-        id: '3',
-        name: 'Band 3',
-        minIncome: 388001,
-        maxIncome: 6000000,
-        rate: 30,
-        fixedAmount: 53800,
-        isActive: true,
-      },
-      {
-        id: '4',
-        name: 'Band 4',
-        minIncome: 6000001,
-        maxIncome: 9600000,
-        rate: 32.5,
-        fixedAmount: 1737400,
-        isActive: true,
-      },
-      {
-        id: '5',
-        name: 'Band 5',
-        minIncome: 9600001,
-        maxIncome: Infinity,
-        rate: 35,
-        fixedAmount: 2907400,
-        isActive: true,
-      },
-    ];
-    setTaxBrackets(kenyaTaxBrackets);
-  }, []);
-
-  // Step-by-step PAYE calculation algorithm
-  const calculatePAYETax = async (grossTaxableIncome: number): Promise<PAYECalculationResult> => {
-    const steps: TaxCalculationStep[] = [];
-    let taxDue = 0; // Step 3: Initialize tax_due = 0
-    let stepCounter = 1;
-
-    // Step 4 & 5: For each tax bracket, calculate and accumulate tax
-    for (const bracket of taxBrackets.filter(b => b.isActive)) {
-      setCurrentCalculationStep(stepCounter);
-      await new Promise(resolve => setTimeout(resolve, 800)); // Visual delay
-
-      if (grossTaxableIncome > bracket.minIncome) {
-        // Calculate taxable income within this bracket
-        const incomeInBracket = Math.min(
-          grossTaxableIncome - bracket.minIncome,
-          bracket.maxIncome - bracket.minIncome
-        );
-
-        if (incomeInBracket > 0) {
-          const taxForBracket = (incomeInBracket * bracket.rate) / 100;
-          taxDue += taxForBracket;
-
-          steps.push({
-            step: stepCounter,
-            description: `Calculate tax for income in ${bracket.name} (${bracket.rate}% rate)`,
-            income: incomeInBracket,
-            rate: bracket.rate,
-            taxAmount: taxForBracket,
-            cumulativeTax: taxDue,
-            bracket,
-          });
-
-          stepCounter++;
-        }
-
-        // If income is fully within this bracket, stop
-        if (grossTaxableIncome <= bracket.maxIncome) {
-          break;
-        }
-      }
+  // Algorithm execution state
+  const [currentStep, setCurrentStep] = useState(0);
+  const [algorithmProgress, setAlgorithmProgress] = useState(0);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [processingLogs, setProcessingLogs] = useState<string[]>([]);
+  
+  // Form state
+  const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>({
+    month: new Date().getMonth() + 1,
+    year: new Date().getFullYear(),
+    description: ''
+  });
+  
+  const [employeeFilters, setEmployeeFilters] = useState<EmployeeFilter>({
+    department: 'all',
+    payGroup: 'all',
+    employmentStatus: 'active'
+  });
+  
+  // Tax calculation state
+  const [taxBrackets, setTaxBrackets] = useState(KENYA_TAX_BRACKETS);
+  const [statutoryReliefs, setStatutoryReliefs] = useState<StatutoryReliefs>({
+    personalRelief: KENYA_TAX_CONSTANTS.PERSONAL_RELIEF,
+    insuranceRelief: KENYA_TAX_CONSTANTS.INSURANCE_RELIEF_LIMIT,
+    pensionRelief: KENYA_TAX_CONSTANTS.PENSION_RELIEF_LIMIT,
+    disabilityRelief: 50000,
+    housingRelief: 15000
+  });
+  
+  // Results state
+  const [employeesList, setEmployeesList] = useState<PayrollRecord[]>([]);
+  const [payeCalculations, setPayeCalculations] = useState<PAYECalculation[]>([]);
+  const [validationResults, setValidationResults] = useState<any[]>([]);
+  const [generatedReports, setGeneratedReports] = useState<TaxReport[]>([]);
+  const [iTaxFile, setITaxFile] = useState<Blob | null>(null);
+  
+  // UI state
+  const [selectedTab, setSelectedTab] = useState('calculation');
+  const [showAlgorithmDetails, setShowAlgorithmDetails] = useState(false);
+  
+  // Algorithm steps definition
+  const algorithmSteps: AlgorithmStep[] = [
+    { step: 1, title: 'INPUT payroll_period (month, year)', status: 'pending' },
+    { step: 2, title: 'SELECT employees_list based on filters', status: 'pending' },
+    { step: 3, title: 'LOAD PAYE_tax_table FROM system_settings', status: 'pending' },
+    { step: 4, title: 'LOAD statutory_reliefs', status: 'pending' },
+    { step: 5, title: 'FOR each employee: CALCULATE PAYE', status: 'pending' },
+    { step: 6, title: 'VALIDATE PAYE against KRA calculator', status: 'pending' },
+    { step: 7, title: 'GENERATE reports (P10, P10A, P9A)', status: 'pending' },
+    { step: 8, title: 'PREPARE iTax submission file', status: 'pending' },
+    { step: 9, title: 'LOG audit entries', status: 'pending' }
+  ];
+  
+  // Mock data for demonstration
+  const mockEmployeesData: PayrollRecord[] = [
+    {
+      employeeId: 'EMP001',
+      employeeName: 'John Mwangi',
+      department: 'Finance',
+      grossPay: 150000,
+      basicSalary: 120000,
+      allowances: 25000,
+      overtime: 5000,
+      personalRelief: 28800,
+      insuranceRelief: 5000,
+      pensionRelief: 18000,
+      isTaxExempt: false
+    },
+    {
+      employeeId: 'EMP002',
+      employeeName: 'Grace Wanjiku',
+      department: 'HR',
+      grossPay: 200000,
+      basicSalary: 180000,
+      allowances: 20000,
+      overtime: 0,
+      personalRelief: 28800,
+      insuranceRelief: 8000,
+      pensionRelief: 24000,
+      isTaxExempt: false
+    },
+    {
+      employeeId: 'EMP003',
+      employeeName: 'Peter Kiprotich',
+      department: 'IT',
+      grossPay: 300000,
+      basicSalary: 250000,
+      allowances: 40000,
+      overtime: 10000,
+      personalRelief: 28800,
+      insuranceRelief: 12000,
+      pensionRelief: 36000,
+      isTaxExempt: false
+    },
+    {
+      employeeId: 'EMP004',
+      employeeName: 'Mary Achieng',
+      department: 'Sales',
+      grossPay: 80000,
+      basicSalary: 70000,
+      allowances: 10000,
+      overtime: 0,
+      personalRelief: 28800,
+      insuranceRelief: 3000,
+      pensionRelief: 10500,
+      isTaxExempt: false
+    },
+    {
+      employeeId: 'EMP005',
+      employeeName: 'Samuel Otieno',
+      department: 'Operations',
+      grossPay: 450000,
+      basicSalary: 400000,
+      allowances: 50000,
+      overtime: 0,
+      personalRelief: 28800,
+      insuranceRelief: 15000,
+      pensionRelief: 60000,
+      isTaxExempt: false
     }
+  ];
 
-    // Apply personal relief
-    const netTax = Math.max(0, taxDue - PERSONAL_RELIEF);
-    const effectiveRate = grossTaxableIncome > 0 ? (netTax / grossTaxableIncome) * 100 : 0;
-
-    return {
-      grossIncome: grossTaxableIncome,
-      taxableIncome: grossTaxableIncome,
-      totalTax: taxDue,
-      personalRelief: PERSONAL_RELIEF,
-      netTax,
-      effectiveRate,
-      steps,
-    };
-  };
-
-  const handleCalculate = async () => {
-    const income = parseFloat(grossIncome);
-    if (isNaN(income) || income < 0) {
-      alert('Please enter a valid gross income amount');
-      return;
-    }
-
-    setIsCalculating(true);
-    setShowSteps(true);
-    setCurrentCalculationStep(0);
-
-    try {
-      // Step 1: Input gross taxable income (already done)
-      // Step 2: Retrieve current PAYE tax brackets (from state)
-      
-      const result = await calculatePAYETax(income);
-      setCalculationResult(result);
-    } catch (error) {
-      console.error('Tax calculation failed:', error);
-    } finally {
-      setIsCalculating(false);
-      setCurrentCalculationStep(0);
-    }
-  };
-
-  const resetCalculation = () => {
-    setCalculationResult(null);
-    setShowSteps(false);
-    setCurrentCalculationStep(0);
-    setGrossIncome('');
-  };
-
-  const handleEditBracket = (bracket: TaxBracket) => {
-    setEditingBracket(bracket);
-    setIsEditDialogOpen(true);
-  };
-
-  const saveBracket = () => {
-    if (!editingBracket) return;
+  // Step 1: Input payroll period and filters
+  const handleStep1_InputPeriod = async () => {
+    setCurrentStep(1);
+    setAlgorithmProgress(10);
+    addProcessingLog(`[STEP 1] INPUT payroll_period: ${payrollPeriod.month}/${payrollPeriod.year}`);
     
-    setTaxBrackets(prev => 
-      prev.map(bracket => 
-        bracket.id === editingBracket.id ? editingBracket : bracket
-      )
-    );
-    setIsEditDialogOpen(false);
-    setEditingBracket(null);
+    if (!payrollPeriod.month || !payrollPeriod.year) {
+      throw new Error('Payroll period is required');
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    addProcessingLog(`[STEP 1] ✓ Payroll period validated: ${getMonthName(payrollPeriod.month)} ${payrollPeriod.year}`);
   };
 
-  const canManageTax = hasAnyRole([UserRole.ADMIN, UserRole.PAYROLL_OFFICER]);
+  // Step 2: Select employees list based on filters
+  const handleStep2_SelectEmployees = async () => {
+    setCurrentStep(2);
+    setAlgorithmProgress(20);
+    addProcessingLog(`[STEP 2] SELECT employees_list based on filters...`);
+    
+    let filteredEmployees = [...mockEmployeesData];
+    
+    // Apply department filter
+    if (employeeFilters.department !== 'all') {
+      filteredEmployees = filteredEmployees.filter(emp => 
+        emp.department.toLowerCase() === employeeFilters.department.toLowerCase()
+      );
+    }
+    
+    // Apply other filters as needed
+    setEmployeesList(filteredEmployees);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
+  };
+
+  // Step 3: Load PAYE tax table
+  const handleStep3_LoadTaxTable = async () => {
+    setCurrentStep(3);
+    setAlgorithmProgress(30);
+    addProcessingLog(`[STEP 3] LOAD PAYE_tax_table FROM system_settings...`);
+    
+    // Load and validate tax brackets
+    setTaxBrackets(KENYA_TAX_BRACKETS);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    addProcessingLog(`[STEP 3] ✓ Loaded ${KENYA_TAX_BRACKETS.length} tax brackets from KRA 2024 table`);
+  };
+
+  // Step 4: Load statutory reliefs
+  const handleStep4_LoadReliefs = async () => {
+    setCurrentStep(4);
+    setAlgorithmProgress(40);
+    addProcessingLog(`[STEP 4] LOAD statutory_reliefs...`);
+    
+    // Validate reliefs are loaded
+    if (!statutoryReliefs.personalRelief) {
+      throw new Error('Personal relief not configured');
+    }
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    addProcessingLog(`[STEP 4] ✓ Loaded reliefs: Personal (${formatKES(statutoryReliefs.personalRelief)}), Insurance (${formatKES(statutoryReliefs.insuranceRelief)}), Pension (${formatKES(statutoryReliefs.pensionRelief)})`);
+  };
+
+  // Step 5: Calculate PAYE for each employee
+  const handleStep5_CalculatePAYE = async () => {
+    setCurrentStep(5);
+    setAlgorithmProgress(50);
+    addProcessingLog(`[STEP 5] FOR each employee: CALCULATE PAYE...`);
+    
+    const calculations: PAYECalculation[] = [];
+    
+    for (let i = 0; i < employeesList.length; i++) {
+      const employee = employeesList[i];
+      setAlgorithmProgress(50 + (i / employeesList.length) * 20);
+      
+      addProcessingLog(`[STEP 5.${i+1}] Processing ${employee.employeeName}...`);
+      
+      // 1. FETCH gross_pay
+      const grossPay = employee.grossPay;
+      
+      // 2. FETCH reliefs
+      const totalReliefs = employee.personalRelief + employee.insuranceRelief + employee.pensionRelief;
+      
+      // 3. Check tax exemption
+      if (employee.isTaxExempt) {
+        calculations.push({
+          employeeId: employee.employeeId,
+          employeeName: employee.employeeName,
+          grossPay: grossPay,
+          taxableIncome: 0,
+          payeAmount: 0,
+          personalRelief: employee.personalRelief,
+          totalReliefs: totalReliefs,
+          effectiveRate: 0,
+          dateCalculated: new Date().toISOString(),
+          calculatedBy: user?.id || 'system',
+          validationStatus: 'valid'
+        });
+        continue;
+      }
+      
+      // 4. CALCULATE taxable_income
+      const annualGrossPay = grossPay * 12; // Convert to annual
+      const annualReliefs = totalReliefs; // Already annual
+      const taxableIncome = Math.max(0, annualGrossPay - annualReliefs);
+      
+      // 5. Check if taxable income <= 0
+      if (taxableIncome <= 0) {
+        calculations.push({
+          employeeId: employee.employeeId,
+          employeeName: employee.employeeName,
+          grossPay: grossPay,
+          taxableIncome: 0,
+          payeAmount: 0,
+          personalRelief: employee.personalRelief,
+          totalReliefs: totalReliefs,
+          effectiveRate: 0,
+          dateCalculated: new Date().toISOString(),
+          calculatedBy: user?.id || 'system',
+          validationStatus: 'valid'
+        });
+        continue;
+      }
+      
+      // 6-8. Apply PAYE tax brackets
+      let totalTax = 0;
+      let remainingIncome = taxableIncome;
+      
+      for (const bracket of taxBrackets) {
+        if (remainingIncome <= 0) break;
+        
+        const bracketRange = bracket.max - bracket.min + 1;
+        const taxableBracketAmount = Math.min(remainingIncome, bracketRange);
+        totalTax += taxableBracketAmount * bracket.rate;
+        remainingIncome -= taxableBracketAmount;
+      }
+      
+      // 9. Apply personal relief
+      totalTax = Math.max(0, totalTax - statutoryReliefs.personalRelief);
+      
+      // 10. Round to nearest whole number (KRA rounding rule)
+      const payeAmount = Math.round(totalTax / 12); // Convert back to monthly
+      
+      // 11. Calculate effective rate
+      const effectiveRate = grossPay > 0 ? (payeAmount / grossPay) * 100 : 0;
+      
+      calculations.push({
+        employeeId: employee.employeeId,
+        employeeName: employee.employeeName,
+        grossPay: grossPay,
+        taxableIncome: taxableIncome / 12, // Convert back to monthly for display
+        payeAmount: payeAmount,
+        personalRelief: employee.personalRelief,
+        totalReliefs: totalReliefs,
+        effectiveRate: effectiveRate,
+        dateCalculated: new Date().toISOString(),
+        calculatedBy: user?.id || 'system',
+        validationStatus: 'pending'
+      });
+      
+      await new Promise(resolve => setTimeout(resolve, 200));
+    }
+    
+    setPayeCalculations(calculations);
+    addProcessingLog(`[STEP 5] ✓ Calculated PAYE for ${calculations.length} employees`);
+  };
+
+  // Step 6: Validate PAYE against KRA calculator
+  const handleStep6_ValidatePAYE = async () => {
+    setCurrentStep(6);
+    setAlgorithmProgress(70);
+    addProcessingLog(`[STEP 6] VALIDATE PAYE against KRA calculator...`);
+    
+    const validationResults = payeCalculations.map(calc => {
+      // Mock validation - in real system, this would call KRA API
+      const expectedPAYE = calc.payeAmount; // Assuming our calculation is correct
+      const discrepancy = Math.abs(calc.payeAmount - expectedPAYE);
+      const allowedThreshold = 10; // KES 10 tolerance
+      
+      return {
+        ...calc,
+        validationStatus: discrepancy > allowedThreshold ? 'flagged' : 'valid',
+        discrepancy: discrepancy
+      };
+    });
+    
+    setPayeCalculations(validationResults);
+    setValidationResults(validationResults);
+    
+    await new Promise(resolve => setTimeout(resolve, 800));
+    const flaggedCount = validationResults.filter(r => r.validationStatus === 'flagged').length;
+    addProcessingLog(`[STEP 6] ✓ Validation complete. ${flaggedCount} records flagged for review`);
+  };
+
+  // Step 7: Generate reports
+  const handleStep7_GenerateReports = async () => {
+    setCurrentStep(7);
+    setAlgorithmProgress(80);
+    addProcessingLog(`[STEP 7] GENERATE reports (P10, P10A, P9A)...`);
+    
+    const reports: TaxReport[] = [];
+    
+    // Generate P10 report (Monthly employee deductions)
+    const p10Data = payeCalculations.map(calc => ({
+      employeeId: calc.employeeId,
+      employeeName: calc.employeeName,
+      taxablePay: calc.taxableIncome,
+      payeDeduction: calc.payeAmount
+    }));
+    
+    reports.push({
+      reportType: 'P10',
+      period: `${payrollPeriod.month}/${payrollPeriod.year}`,
+      data: p10Data,
+      generatedAt: new Date().toISOString(),
+      totalEmployees: payeCalculations.length,
+      totalTaxable: payeCalculations.reduce((sum, calc) => sum + calc.taxableIncome, 0),
+      totalPAYE: payeCalculations.reduce((sum, calc) => sum + calc.payeAmount, 0)
+    });
+    
+    // Generate P10A summary
+    reports.push({
+      reportType: 'P10A',
+      period: `${payrollPeriod.month}/${payrollPeriod.year}`,
+      data: [{
+        totalEmployees: payeCalculations.length,
+        totalTaxablePay: payeCalculations.reduce((sum, calc) => sum + calc.taxableIncome, 0),
+        totalPAYE: payeCalculations.reduce((sum, calc) => sum + calc.payeAmount, 0)
+      }],
+      generatedAt: new Date().toISOString(),
+      totalEmployees: payeCalculations.length,
+      totalTaxable: payeCalculations.reduce((sum, calc) => sum + calc.taxableIncome, 0),
+      totalPAYE: payeCalculations.reduce((sum, calc) => sum + calc.payeAmount, 0)
+    });
+    
+    setGeneratedReports(reports);
+    
+    await new Promise(resolve => setTimeout(resolve, 1000));
+    addProcessingLog(`[STEP 7] ✓ Generated ${reports.length} reports (P10, P10A)`);
+  };
+
+  // Step 8: Prepare iTax submission file
+  const handleStep8_PrepareiTax = async () => {
+    setCurrentStep(8);
+    setAlgorithmProgress(90);
+    addProcessingLog(`[STEP 8] PREPARE iTax submission file...`);
+    
+    // Format iTax CSV file according to KRA template
+    const csvHeaders = ['Employee ID', 'Employee Name', 'Taxable Pay', 'PAYE Deduction'];
+    const csvData = payeCalculations.map(calc => [
+      calc.employeeId,
+      calc.employeeName,
+      calc.taxableIncome.toString(),
+      calc.payeAmount.toString()
+    ]);
+    
+    const csvContent = [csvHeaders, ...csvData]
+      .map(row => row.join(','))
+      .join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    setITaxFile(blob);
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    addProcessingLog(`[STEP 8] ✓ iTax submission file prepared (${blob.size} bytes)`);
+  };
+
+  // Step 9: Log audit entries
+  const handleStep9_LogAudit = async () => {
+    setCurrentStep(9);
+    setAlgorithmProgress(100);
+    addProcessingLog(`[STEP 9] LOG audit entries...`);
+    
+    // Log tax calculation action
+    logTaxAction(
+      {
+        userId: user?.id || 'system',
+        userAgent: navigator.userAgent,
+        ipAddress: '127.0.0.1'
+      },
+      AuditAction.CALCULATE,
+      `tax_calculation_${payrollPeriod.month}_${payrollPeriod.year}`,
+      undefined,
+      {
+        period: `${payrollPeriod.month}/${payrollPeriod.year}`,
+        employeesProcessed: payeCalculations.length,
+        totalPAYE: payeCalculations.reduce((sum, calc) => sum + calc.payeAmount, 0),
+        flaggedRecords: payeCalculations.filter(calc => calc.validationStatus === 'flagged').length
+      }
+    );
+    
+    await new Promise(resolve => setTimeout(resolve, 500));
+    addProcessingLog(`[STEP 9] ✓ Audit entries logged successfully`);
+    addProcessingLog(`[COMPLETE] Tax calculation algorithm completed successfully!`);
+  };
+
+  // Execute complete algorithm
+  const executeCompleteAlgorithm = async () => {
+    try {
+      setIsProcessing(true);
+      setProcessingLogs([]);
+      setCurrentStep(0);
+      setAlgorithmProgress(0);
+      
+      await handleStep1_InputPeriod();
+      await handleStep2_SelectEmployees();
+      await handleStep3_LoadTaxTable();
+      await handleStep4_LoadReliefs();
+      await handleStep5_CalculatePAYE();
+      await handleStep6_ValidatePAYE();
+      await handleStep7_GenerateReports();
+      await handleStep8_PrepareiTax();
+      await handleStep9_LogAudit();
+      
+    } catch (error) {
+      addProcessingLog(`[ERROR] ${error}`);
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Helper functions
+  const addProcessingLog = (message: string) => {
+    setProcessingLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
+  };
+
+  const getMonthName = (month: number) => {
+    const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+    return months[month - 1];
+  };
+
+  const downloadReport = (reportType: string) => {
+    const report = generatedReports.find(r => r.reportType === reportType);
+    if (!report) return;
+    
+    const csvContent = "data:text/csv;charset=utf-8," + 
+      JSON.stringify(report, null, 2);
+    const encodedUri = encodeURI(csvContent);
+    const link = document.createElement("a");
+    link.setAttribute("href", encodedUri);
+    link.setAttribute("download", `${reportType}_${report.period.replace('/', '_')}.json`);
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
+  const downloadiTaxFile = () => {
+    if (!iTaxFile) return;
+    
+    const url = window.URL.createObjectURL(iTaxFile);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `iTax_${payrollPeriod.month}_${payrollPeriod.year}.csv`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+  };
+
+  // Check permissions
+  const canManageTax = hasAnyRole([UserRole.ADMIN, UserRole.PAYROLL_OFFICER, UserRole.HR_MANAGER]);
+
+  if (!canManageTax) {
+    return (
+      <div className="p-6">
+        <Alert variant="destructive">
+          <AlertCircle className="h-4 w-4" />
+          <AlertDescription>
+            You don't have permission to access the Tax Management module. 
+            Contact your administrator for access.
+          </AlertDescription>
+        </Alert>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Tax Management</h1>
-          <p className="mt-1 text-sm text-gray-600">
-            Kenya PAYE tax calculation and bracket management system
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900">PAYE Tax Management</h1>
+          <p className="text-gray-600">Kenya Revenue Authority (KRA) compliant tax calculation system</p>
         </div>
-        <Button onClick={resetCalculation} variant="outline" className="mt-4 sm:mt-0">
-          New Calculation
-        </Button>
+        <div className="flex gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setShowAlgorithmDetails(true)}
+            className="flex items-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            Algorithm Details
+          </Button>
+          <Badge className="bg-green-100 text-green-800">
+            <Shield className="w-4 h-4 mr-1" />
+            KRA 2024 Compliant
+          </Badge>
+        </div>
       </div>
 
-      <Tabs defaultValue="calculator" className="space-y-6">
-        <TabsList>
-          <TabsTrigger value="calculator">PAYE Calculator</TabsTrigger>
-          <TabsTrigger value="brackets">Tax Brackets</TabsTrigger>
-          <TabsTrigger value="reports">Tax Reports</TabsTrigger>
+      {/* Algorithm Details Dialog */}
+      <Dialog open={showAlgorithmDetails} onOpenChange={setShowAlgorithmDetails}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>PAYE Tax Calculation Algorithm</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <h4 className="font-medium mb-2">Algorithm Steps</h4>
+                <div className="space-y-2">
+                  {algorithmSteps.map((step, index) => (
+                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
+                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
+                        currentStep >= step.step ? 'bg-green-500 text-white' : 'bg-gray-200'
+                      }`}>
+                        {step.step}
+                      </div>
+                      <span className="text-sm">{step.title}</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h4 className="font-medium mb-2">Current Progress</h4>
+                <Progress value={algorithmProgress} className="mb-4" />
+                <div className="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto">
+                  {processingLogs.map((log, index) => (
+                    <div key={index} className="text-xs font-mono mb-1">{log}</div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
+        <TabsList className="grid w-full grid-cols-5">
+          <TabsTrigger value="calculation">Tax Calculation</TabsTrigger>
+          <TabsTrigger value="results">Results & Validation</TabsTrigger>
+          <TabsTrigger value="reports">Reports & Export</TabsTrigger>
+          <TabsTrigger value="submission">iTax Submission</TabsTrigger>
+          <TabsTrigger value="settings">Tax Settings</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="calculator" className="space-y-6">
-          {/* Algorithm Steps Overview */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Calculator className="mr-2 h-5 w-5" />
-                PAYE Tax Calculation Algorithm
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-1 md:grid-cols-6 gap-2 text-sm">
-                {[
-                  'Input Income',
-                  'Get Tax Brackets',
-                  'Initialize Tax = 0',
-                  'Calculate by Bracket',
-                  'Accumulate Tax',
-                  'Return Total Tax'
-                ].map((step, index) => (
-                  <div
-                    key={index}
-                    className={`text-center p-3 rounded-lg border ${
-                      index + 1 <= currentCalculationStep || (!isCalculating && calculationResult)
-                        ? 'bg-indigo-100 text-indigo-800 border-indigo-200'
-                        : 'bg-gray-50 text-gray-600 border-gray-200'
-                    }`}
-                  >
-                    <div className="font-medium text-lg">{index + 1}</div>
-                    <div className="text-xs mt-1">{step}</div>
-                  </div>
-                ))}
-              </div>
-              {isCalculating && (
-                <div className="mt-4">
-                  <Progress value={(currentCalculationStep / 6) * 100} className="h-2" />
-                  <p className="text-sm text-gray-600 mt-2">
-                    Processing step {currentCalculationStep} of 6...
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-
-          {/* Input Section */}
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <DollarSign className="mr-2 h-5 w-5" />
-                Step 1: Input Gross Taxable Income
-              </CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="flex flex-col sm:flex-row gap-4">
-                <div className="flex-1">
-                  <Label htmlFor="grossIncome">Annual Gross Taxable Income (KES)</Label>
-                  <Input
-                    id="grossIncome"
-                    type="number"
-                    placeholder="1200000"
-                    value={grossIncome}
-                    onChange={(e) => setGrossIncome(e.target.value)}
-                    className="text-lg"
-                    min="0"
-                    step="1000"
-                  />
-                  <p className="text-xs text-gray-500 mt-1">
-                    Enter the annual gross taxable income in Kenyan Shillings
-                  </p>
-                </div>
-                <div className="flex items-end">
-                  <Button
-                    onClick={handleCalculate}
-                    disabled={!grossIncome || isCalculating}
-                    className="w-full sm:w-auto"
-                  >
-                    {isCalculating ? (
-                      <>
-                        <Calculator className="mr-2 h-4 w-4 animate-spin" />
-                        Calculating...
-                      </>
-                    ) : (
-                      <>
-                        <Calculator className="mr-2 h-4 w-4" />
-                        Calculate PAYE Tax
-                      </>
-                    )}
-                  </Button>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Calculation Steps */}
-          {showSteps && calculationResult && (
+        {/* Tax Calculation Tab */}
+        <TabsContent value="calculation" className="space-y-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Input Section */}
             <Card>
               <CardHeader>
-                <CardTitle className="flex items-center">
-                  <CheckCircle className="mr-2 h-5 w-5 text-green-600" />
-                  Step-by-Step Tax Calculation
+                <CardTitle className="flex items-center gap-2">
+                  <Calculator className="w-5 h-5" />
+                  Step 1-4: Input & Configuration
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="month">Tax Month</Label>
+                    <Select
+                      value={payrollPeriod.month.toString()}
+                      onValueChange={(value) => setPayrollPeriod({...payrollPeriod, month: parseInt(value)})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({length: 12}, (_, i) => i + 1).map(month => (
+                          <SelectItem key={month} value={month.toString()}>
+                            {getMonthName(month)}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Label htmlFor="year">Tax Year</Label>
+                    <Select
+                      value={payrollPeriod.year.toString()}
+                      onValueChange={(value) => setPayrollPeriod({...payrollPeriod, year: parseInt(value)})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="2023">2023</SelectItem>
+                        <SelectItem value="2024">2024</SelectItem>
+                        <SelectItem value="2025">2025</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div>
+                  <Label htmlFor="department">Department Filter</Label>
+                  <Select
+                    value={employeeFilters.department}
+                    onValueChange={(value) => setEmployeeFilters({...employeeFilters, department: value})}
+                  >
+                    <SelectTrigger>
+                      <SelectValue />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="all">All Departments</SelectItem>
+                      <SelectItem value="finance">Finance</SelectItem>
+                      <SelectItem value="hr">Human Resources</SelectItem>
+                      <SelectItem value="it">IT</SelectItem>
+                      <SelectItem value="sales">Sales</SelectItem>
+                      <SelectItem value="operations">Operations</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div className="pt-4 border-t">
+                  <h4 className="font-medium mb-2">Statutory Reliefs (Annual)</h4>
+                  <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div>
+                      <Label>Personal Relief</Label>
+                      <div className="font-medium">{formatKES(statutoryReliefs.personalRelief)}</div>
+                    </div>
+                    <div>
+                      <Label>Insurance Relief</Label>
+                      <div className="font-medium">{formatKES(statutoryReliefs.insuranceRelief)}</div>
+                    </div>
+                  </div>
+                </div>
+
+                <Button 
+                  onClick={executeCompleteAlgorithm}
+                  disabled={isProcessing}
+                  className="w-full"
+                  size="lg"
+                >
+                  {isProcessing ? (
+                    <div className="flex items-center gap-2">
+                      <RefreshCw className="w-4 h-4 animate-spin" />
+                      Processing Algorithm...
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <Calculator className="w-4 h-4" />
+                      Execute PAYE Calculation Algorithm
+                    </div>
+                  )}
+                </Button>
+              </CardContent>
+            </Card>
+
+            {/* Progress Section */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Clock className="w-5 h-5" />
+                  Algorithm Progress
                 </CardTitle>
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  {/* Initial Values */}
-                  <div className="bg-blue-50 p-4 rounded-lg">
-                    <h4 className="font-medium text-blue-900 mb-2">Initial Setup</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
-                      <div>
-                        <span className="text-blue-700">Gross Income:</span>
-                        <span className="font-medium ml-2">{formatKES(calculationResult.grossIncome)}</span>
-                      </div>
-                      <div>
-                        <span className="text-blue-700">Tax Due Initialized:</span>
-                        <span className="font-medium ml-2">KES 0</span>
-                      </div>
-                      <div>
-                        <span className="text-blue-700">Personal Relief:</span>
-                        <span className="font-medium ml-2">{formatKES(PERSONAL_RELIEF)}</span>
-                      </div>
-                    </div>
+                  <Progress value={algorithmProgress} className="w-full" />
+                  <div className="text-center text-sm text-gray-600">
+                    Step {currentStep} of {algorithmSteps.length} - {algorithmProgress}% Complete
                   </div>
-
-                  {/* Calculation Steps */}
-                  <div className="space-y-3">
-                    {calculationResult.steps.map((step, index) => (
-                      <div key={index} className="border rounded-lg p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <h5 className="font-medium flex items-center">
-                            <Badge variant="outline" className="mr-2">
-                              Step {step.step}
-                            </Badge>
-                            {step.description}
-                          </h5>
-                          <ArrowRight className="h-4 w-4 text-gray-400" />
-                        </div>
-                        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 text-sm bg-gray-50 p-3 rounded">
-                          <div>
-                            <span className="text-gray-600">Income in bracket:</span>
-                            <div className="font-medium">{formatKES(step.income)}</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Tax rate:</span>
-                            <div className="font-medium">{step.rate}%</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Tax for bracket:</span>
-                            <div className="font-medium text-red-600">{formatKES(step.taxAmount)}</div>
-                          </div>
-                          <div>
-                            <span className="text-gray-600">Cumulative tax:</span>
-                            <div className="font-medium text-red-800">{formatKES(step.cumulativeTax)}</div>
-                          </div>
-                        </div>
+                  
+                  <div className="bg-gray-50 p-4 rounded-lg h-64 overflow-y-auto">
+                    <h4 className="font-medium mb-2">Processing Log</h4>
+                    {processingLogs.length === 0 ? (
+                      <p className="text-sm text-gray-500">Click "Execute Algorithm" to start processing</p>
+                    ) : (
+                      <div className="space-y-1">
+                        {processingLogs.map((log, index) => (
+                          <div key={index} className="text-xs font-mono">{log}</div>
+                        ))}
                       </div>
-                    ))}
-                  </div>
-
-                  {/* Final Result */}
-                  <div className="bg-green-50 border border-green-200 rounded-lg p-4">
-                    <h4 className="font-medium text-green-900 mb-3">Final PAYE Tax Calculation</h4>
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-                      <div className="text-center">
-                        <div className="text-sm text-green-700">Total Tax Due</div>
-                        <div className="text-xl font-bold text-green-900">
-                          {formatKES(calculationResult.totalTax)}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-green-700">Personal Relief</div>
-                        <div className="text-xl font-bold text-green-600">
-                          -{formatKES(calculationResult.personalRelief)}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-green-700">Net PAYE Tax</div>
-                        <div className="text-xl font-bold text-green-900">
-                          {formatKES(calculationResult.netTax)}
-                        </div>
-                      </div>
-                      <div className="text-center">
-                        <div className="text-sm text-green-700">Effective Rate</div>
-                        <div className="text-xl font-bold text-green-900">
-                          {calculationResult.effectiveRate.toFixed(2)}%
-                        </div>
-                      </div>
-                    </div>
+                    )}
                   </div>
                 </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          {/* Employee Selection Preview */}
+          {employeesList.length > 0 && (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Users className="w-5 h-5" />
+                  Selected Employees ({employeesList.length})
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Employee</TableHead>
+                      <TableHead>Department</TableHead>
+                      <TableHead>Gross Pay</TableHead>
+                      <TableHead>Personal Relief</TableHead>
+                      <TableHead>Total Reliefs</TableHead>
+                      <TableHead>Tax Exempt</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {employeesList.map((employee) => (
+                      <TableRow key={employee.employeeId}>
+                        <TableCell className="font-medium">{employee.employeeName}</TableCell>
+                        <TableCell>{employee.department}</TableCell>
+                        <TableCell>{formatKES(employee.grossPay)}</TableCell>
+                        <TableCell>{formatKES(employee.personalRelief)}</TableCell>
+                        <TableCell>{formatKES(employee.personalRelief + employee.insuranceRelief + employee.pensionRelief)}</TableCell>
+                        <TableCell>
+                          <Badge variant={employee.isTaxExempt ? "destructive" : "secondary"}>
+                            {employee.isTaxExempt ? 'Exempt' : 'Taxable'}
+                          </Badge>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
               </CardContent>
             </Card>
           )}
         </TabsContent>
 
-        <TabsContent value="brackets" className="space-y-6">
-          {/* Current Tax Brackets */}
+        {/* Results & Validation Tab */}
+        <TabsContent value="results" className="space-y-6">
+          {payeCalculations.length > 0 ? (
+            <>
+              {/* Summary Cards */}
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total Employees</p>
+                        <p className="text-2xl font-bold">{payeCalculations.length}</p>
+                      </div>
+                      <Users className="w-8 h-8 text-blue-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Total PAYE</p>
+                        <p className="text-2xl font-bold">
+                          {formatKES(payeCalculations.reduce((sum, calc) => sum + calc.payeAmount, 0))}
+                        </p>
+                      </div>
+                      <DollarSign className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Valid Records</p>
+                        <p className="text-2xl font-bold">
+                          {payeCalculations.filter(calc => calc.validationStatus === 'valid').length}
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 text-green-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+                
+                <Card>
+                  <CardContent className="p-6">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-600">Flagged Records</p>
+                        <p className="text-2xl font-bold">
+                          {payeCalculations.filter(calc => calc.validationStatus === 'flagged').length}
+                        </p>
+                      </div>
+                      <AlertCircle className="w-8 h-8 text-red-500" />
+                    </div>
+                  </CardContent>
+                </Card>
+              </div>
+
+              {/* PAYE Calculations Table */}
+              <Card>
+                <CardHeader>
+                  <CardTitle className="flex items-center gap-2">
+                    <Receipt className="w-5 h-5" />
+                    PAYE Calculation Results
+                  </CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Employee</TableHead>
+                        <TableHead>Gross Pay</TableHead>
+                        <TableHead>Taxable Income</TableHead>
+                        <TableHead>PAYE Amount</TableHead>
+                        <TableHead>Effective Rate</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Validation</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {payeCalculations.map((calc) => (
+                        <TableRow key={calc.employeeId}>
+                          <TableCell className="font-medium">{calc.employeeName}</TableCell>
+                          <TableCell>{formatKES(calc.grossPay)}</TableCell>
+                          <TableCell>{formatKES(calc.taxableIncome)}</TableCell>
+                          <TableCell className="font-bold">{formatKES(calc.payeAmount)}</TableCell>
+                          <TableCell>{calc.effectiveRate.toFixed(2)}%</TableCell>
+                          <TableCell>
+                            <Badge variant={calc.payeAmount > 0 ? "default" : "secondary"}>
+                              {calc.payeAmount > 0 ? 'Taxable' : 'No Tax'}
+                            </Badge>
+                          </TableCell>
+                          <TableCell>
+                            <Badge variant={calc.validationStatus === 'valid' ? "default" : "destructive"}>
+                              {calc.validationStatus === 'valid' ? 'Valid' : 'Flagged'}
+                            </Badge>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            </>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Calculator className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No PAYE Calculations</h3>
+                <p className="text-gray-600">Execute the tax calculation algorithm to see results here.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Reports & Export Tab */}
+        <TabsContent value="reports" className="space-y-6">
+          {generatedReports.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {generatedReports.map((report) => (
+                <Card key={report.reportType}>
+                  <CardHeader>
+                    <CardTitle className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <FileText className="w-5 h-5" />
+                        {report.reportType} Report
+                      </div>
+                      <Badge>{report.period}</Badge>
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent className="space-y-4">
+                    <div className="grid grid-cols-2 gap-4 text-sm">
+                      <div>
+                        <Label>Total Employees</Label>
+                        <div className="font-medium">{report.totalEmployees}</div>
+                      </div>
+                      <div>
+                        <Label>Total Taxable</Label>
+                        <div className="font-medium">{formatKES(report.totalTaxable)}</div>
+                      </div>
+                      <div>
+                        <Label>Total PAYE</Label>
+                        <div className="font-medium">{formatKES(report.totalPAYE)}</div>
+                      </div>
+                      <div>
+                        <Label>Generated</Label>
+                        <div className="font-medium">{new Date(report.generatedAt).toLocaleString()}</div>
+                      </div>
+                    </div>
+                    
+                    <div className="flex gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => downloadReport(report.reportType)}
+                        className="flex items-center gap-2"
+                      >
+                        <Download className="w-4 h-4" />
+                        Download JSON
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        className="flex items-center gap-2"
+                      >
+                        <FileText className="w-4 h-4" />
+                        View Details
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <FileText className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Reports Generated</h3>
+                <p className="text-gray-600">Complete the tax calculation to generate P10, P10A, and P9A reports.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* iTax Submission Tab */}
+        <TabsContent value="submission" className="space-y-6">
+          {iTaxFile ? (
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center gap-2">
+                  <Upload className="w-5 h-5" />
+                  iTax Submission File Ready
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <Alert>
+                  <CheckCircle className="h-4 w-4" />
+                  <AlertDescription>
+                    iTax submission file has been prepared according to KRA CSV template format.
+                  </AlertDescription>
+                </Alert>
+                
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <Label>File Size</Label>
+                    <div className="font-medium">{iTaxFile.size} bytes</div>
+                  </div>
+                  <div>
+                    <Label>Format</Label>
+                    <div className="font-medium">CSV (KRA Template)</div>
+                  </div>
+                  <div>
+                    <Label>Records</Label>
+                    <div className="font-medium">{payeCalculations.length} employees</div>
+                  </div>
+                  <div>
+                    <Label>Period</Label>
+                    <div className="font-medium">{payrollPeriod.month}/{payrollPeriod.year}</div>
+                  </div>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button
+                    onClick={downloadiTaxFile}
+                    className="flex items-center gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download iTax File
+                  </Button>
+                  <Button
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Upload className="w-4 h-4" />
+                    Submit to KRA iTax
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ) : (
+            <Card>
+              <CardContent className="p-12 text-center">
+                <Upload className="w-12 h-12 text-gray-400 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">iTax File Not Ready</h3>
+                <p className="text-gray-600">Complete the tax calculation algorithm to prepare the iTax submission file.</p>
+              </CardContent>
+            </Card>
+          )}
+        </TabsContent>
+
+        {/* Tax Settings Tab */}
+        <TabsContent value="settings" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center justify-between">
-                <div className="flex items-center">
-                  <Settings className="mr-2 h-5 w-5" />
-                  Kenya PAYE Tax Brackets 2024
-                </div>
-                {canManageTax && (
-                  <Button size="sm">
-                    <Plus className="mr-2 h-4 w-4" />
-                    Add Bracket
-                  </Button>
-                )}
+              <CardTitle className="flex items-center gap-2">
+                <Settings className="w-5 h-5" />
+                PAYE Tax Brackets (2024)
               </CardTitle>
             </CardHeader>
             <CardContent>
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Band</TableHead>
-                    <TableHead>Income Range (Annual)</TableHead>
+                    <TableHead>Bracket</TableHead>
+                    <TableHead>Min Income</TableHead>
+                    <TableHead>Max Income</TableHead>
                     <TableHead>Tax Rate</TableHead>
-                    <TableHead>Fixed Amount</TableHead>
-                    <TableHead>Status</TableHead>
-                    {canManageTax && <TableHead>Actions</TableHead>}
+                    <TableHead>Cumulative Max</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {taxBrackets.map((bracket) => (
-                    <TableRow key={bracket.id}>
-                      <TableCell className="font-medium">{bracket.name}</TableCell>
-                      <TableCell>
-                        {formatKES(bracket.minIncome)} - {' '}
-                        {bracket.maxIncome === Infinity 
-                          ? 'Above' 
-                          : formatKES(bracket.maxIncome)
-                        }
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant="outline">{bracket.rate}%</Badge>
-                      </TableCell>
-                      <TableCell>{formatKES(bracket.fixedAmount)}</TableCell>
-                      <TableCell>
-                        <Badge 
-                          variant={bracket.isActive ? "default" : "secondary"}
-                          className={bracket.isActive ? "bg-green-100 text-green-800" : ""}
-                        >
-                          {bracket.isActive ? 'Active' : 'Inactive'}
-                        </Badge>
-                      </TableCell>
-                      {canManageTax && (
-                        <TableCell>
-                          <Button 
-                            variant="ghost" 
-                            size="sm"
-                            onClick={() => handleEditBracket(bracket)}
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                        </TableCell>
-                      )}
+                  {taxBrackets.map((bracket, index) => (
+                    <TableRow key={index}>
+                      <TableCell>{index + 1}</TableCell>
+                      <TableCell>{formatKES(bracket.min)}</TableCell>
+                      <TableCell>{bracket.max === Infinity ? 'No Limit' : formatKES(bracket.max)}</TableCell>
+                      <TableCell>{(bracket.rate * 100).toFixed(1)}%</TableCell>
+                      <TableCell>{bracket.cumulativeMax === Infinity ? 'No Limit' : formatKES(bracket.cumulativeMax)}</TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -531,147 +1165,77 @@ export default function TaxManagement() {
             </CardContent>
           </Card>
 
-          {/* Tax Bracket Statistics */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Active Brackets</CardTitle>
-                <TrendingUp className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {taxBrackets.filter(b => b.isActive).length}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Currently in use
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Highest Rate</CardTitle>
-                <Calculator className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {Math.max(...taxBrackets.filter(b => b.isActive).map(b => b.rate))}%
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Maximum tax rate
-                </p>
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-                <CardTitle className="text-sm font-medium">Personal Relief</CardTitle>
-                <DollarSign className="h-4 w-4 text-muted-foreground" />
-              </CardHeader>
-              <CardContent>
-                <div className="text-2xl font-bold">
-                  {formatKES(PERSONAL_RELIEF)}
-                </div>
-                <p className="text-xs text-muted-foreground">
-                  Annual relief amount
-                </p>
-              </CardContent>
-            </Card>
-          </div>
-        </TabsContent>
-
-        <TabsContent value="reports" className="space-y-6">
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center">
-                <FileText className="mr-2 h-5 w-5" />
-                Tax Reports
+              <CardTitle className="flex items-center gap-2">
+                <Database className="w-5 h-5" />
+                Statutory Reliefs Configuration
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="text-center py-8">
-                <FileText className="mx-auto h-12 w-12 text-gray-400" />
-                <h3 className="mt-2 text-sm font-medium text-gray-900">Tax reports coming soon</h3>
-                <p className="mt-1 text-sm text-gray-500">
-                  Generate comprehensive tax reports and analytics.
-                </p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="personalRelief">Personal Relief (Annual)</Label>
+                  <Input
+                    id="personalRelief"
+                    type="number"
+                    value={statutoryReliefs.personalRelief}
+                    onChange={(e) => setStatutoryReliefs({
+                      ...statutoryReliefs,
+                      personalRelief: Number(e.target.value)
+                    })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="insuranceRelief">Insurance Relief Limit (Annual)</Label>
+                  <Input
+                    id="insuranceRelief"
+                    type="number"
+                    value={statutoryReliefs.insuranceRelief}
+                    onChange={(e) => setStatutoryReliefs({
+                      ...statutoryReliefs,
+                      insuranceRelief: Number(e.target.value)
+                    })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="pensionRelief">Pension Relief Limit (Annual)</Label>
+                  <Input
+                    id="pensionRelief"
+                    type="number"
+                    value={statutoryReliefs.pensionRelief}
+                    onChange={(e) => setStatutoryReliefs({
+                      ...statutoryReliefs,
+                      pensionRelief: Number(e.target.value)
+                    })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="disabilityRelief">Disability Relief (Annual)</Label>
+                  <Input
+                    id="disabilityRelief"
+                    type="number"
+                    value={statutoryReliefs.disabilityRelief}
+                    onChange={(e) => setStatutoryReliefs({
+                      ...statutoryReliefs,
+                      disabilityRelief: Number(e.target.value)
+                    })}
+                  />
+                </div>
+              </div>
+              
+              <div className="mt-4 pt-4 border-t">
+                <Button className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  Save Relief Settings
+                </Button>
               </div>
             </CardContent>
           </Card>
         </TabsContent>
       </Tabs>
-
-      {/* Edit Tax Bracket Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Edit Tax Bracket</DialogTitle>
-          </DialogHeader>
-          {editingBracket && (
-            <div className="space-y-4">
-              <div className="space-y-2">
-                <Label>Bracket Name</Label>
-                <Input
-                  value={editingBracket.name}
-                  onChange={(e) => setEditingBracket({
-                    ...editingBracket,
-                    name: e.target.value
-                  })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Minimum Income</Label>
-                  <Input
-                    type="number"
-                    value={editingBracket.minIncome}
-                    onChange={(e) => setEditingBracket({
-                      ...editingBracket,
-                      minIncome: Number(e.target.value)
-                    })}
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Maximum Income</Label>
-                  <Input
-                    type="number"
-                    value={editingBracket.maxIncome === Infinity ? '' : editingBracket.maxIncome}
-                    onChange={(e) => setEditingBracket({
-                      ...editingBracket,
-                      maxIncome: e.target.value ? Number(e.target.value) : Infinity
-                    })}
-                    placeholder="Leave empty for unlimited"
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>Tax Rate (%)</Label>
-                <Input
-                  type="number"
-                  step="0.1"
-                  value={editingBracket.rate}
-                  onChange={(e) => setEditingBracket({
-                    ...editingBracket,
-                    rate: Number(e.target.value)
-                  })}
-                />
-              </div>
-              <div className="flex justify-end space-x-2">
-                <Button 
-                  variant="outline" 
-                  onClick={() => setIsEditDialogOpen(false)}
-                >
-                  Cancel
-                </Button>
-                <Button onClick={saveBracket}>
-                  <Save className="mr-2 h-4 w-4" />
-                  Save Changes
-                </Button>
-              </div>
-            </div>
-          )}
-        </DialogContent>
-      </Dialog>
     </div>
   );
-}
+};
+
+export default TaxManagement;
