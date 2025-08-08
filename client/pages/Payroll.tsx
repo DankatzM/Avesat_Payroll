@@ -414,6 +414,8 @@ export default function Payroll() {
     setCurrentStep(1);
     setCurrentRun(null);
     setSelectedBatch(null);
+    setSelectedEmployee(null);
+    setProcessingMode('batch');
   };
 
   const approvePayroll = (runId: string) => {
