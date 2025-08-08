@@ -145,7 +145,7 @@ const App = () => (
               path="/settings"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="System Settings" />
+                  <Settings />
                 </ProtectedRoute>
               }
             />
