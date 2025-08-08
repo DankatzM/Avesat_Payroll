@@ -47,6 +47,7 @@ import {
 } from 'lucide-react';
 import { Employee, PayrollPeriod, PayrollEntry, PayrollStatus, PayrollCategory, UserRole } from '@shared/api';
 import { calculateKenyaPayroll, formatKES } from '@shared/kenya-tax';
+import { Link } from 'react-router-dom';
 
 interface PayrollBatch {
   id: string;
