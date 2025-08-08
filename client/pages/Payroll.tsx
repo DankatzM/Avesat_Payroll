@@ -392,13 +392,14 @@ export default function Payroll() {
         newRun.id,
         undefined,
         {
-          batchName: selectedBatch.name,
+          batchName: processingBatch.name,
           period: `${selectedMonth}/${selectedYear}`,
           totalGrossPay: period.totalGrossPay,
           totalNetPay: period.totalNetPay,
           totalDeductions: period.totalDeductions,
           employeeCount: period.employeeCount,
-          status: period.status
+          status: period.status,
+          processingMode: processingMode
         }
       );
       
