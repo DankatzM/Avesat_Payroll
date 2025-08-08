@@ -475,10 +475,12 @@ const Employees: React.FC = () => {
           </Button>
           {canManageEmployees && (
             <>
-              <Button variant="outline" onClick={() => window.open('/employees/import', '_self')}>
-                <Upload className="w-4 h-4 mr-2" />
-                Bulk Import
-              </Button>
+              <Link to="/employees/import">
+                <Button variant="outline">
+                  <Upload className="w-4 h-4 mr-2" />
+                  Bulk Import
+                </Button>
+              </Link>
               <Button onClick={() => setIsAddDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add Employee
