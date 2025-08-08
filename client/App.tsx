@@ -29,6 +29,7 @@ import AddEmployee from "./pages/employees/AddEmployee";
 import BulkImport from "./pages/employees/BulkImport";
 import EmployeeList from "./pages/employees/EmployeeList";
 import EmployeeProfile from "./pages/employees/EmployeeProfile";
+import EmployeeReports from "./pages/employees/EmployeeReports";
 
 // Payroll Sub-modules
 import PayrollCalendar from "./pages/payroll/Calendar";
