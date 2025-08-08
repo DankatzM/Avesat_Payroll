@@ -370,7 +370,7 @@ export default function Payroll() {
       const newRun: PayrollRun = {
         id: period.id,
         period,
-        batch: selectedBatch,
+        batch: processingBatch,
         calculations,
         status: 'completed',
         createdAt: new Date().toISOString(),
