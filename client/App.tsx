@@ -197,9 +197,29 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Only create root if it doesn't exist (prevents double initialization)
+// Create root only once and handle hot module replacement
 const container = document.getElementById("root")!;
-if (!container._reactRootContainer) {
+
+// Check if we're in development and handle HMR
+if (import.meta.hot) {
+  // In development with HMR, we need to handle re-renders differently
+  let root: any;
+
+  const renderApp = () => {
+    if (!root) {
+      root = createRoot(container);
+    }
+    root.render(<App />);
+  };
+
+  renderApp();
+
+  // Accept HMR updates
+  import.meta.hot.accept(() => {
+    renderApp();
+  });
+} else {
+  // In production, create root normally
   const root = createRoot(container);
   root.render(<App />);
 }
