@@ -26,8 +26,7 @@ import {
   CheckCircle,
   RefreshCw
 } from 'lucide-react';
-import { Employee, UserRole } from '@shared/api';
-import { employeeService, handleAPIError } from '@shared/data-service';
+import { Employee, UserRole, PayrollCategory } from '@shared/api';
 import { formatKES } from '@shared/kenya-tax';
 
 export default function EmployeeProfile() {
