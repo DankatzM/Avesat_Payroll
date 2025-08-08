@@ -28,6 +28,7 @@ import Analytics from "./pages/dashboard/Analytics";
 import AddEmployee from "./pages/employees/AddEmployee";
 import BulkImport from "./pages/employees/BulkImport";
 import EmployeeList from "./pages/employees/EmployeeList";
+import EmployeeProfile from "./pages/employees/EmployeeProfile";
 
 // Payroll Sub-modules
 import PayrollCalendar from "./pages/payroll/Calendar";
