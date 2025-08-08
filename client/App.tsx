@@ -192,6 +192,31 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            {/* Sub-module Routes */}
+            <Route
+              path="/dashboard/analytics"
+              element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employees/add"
+              element={
+                <ProtectedRoute>
+                  <AddEmployee />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/calendar"
+              element={
+                <ProtectedRoute>
+                  <PayrollCalendar />
+                </ProtectedRoute>
+              }
+            />
             {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
             <Route path="*" element={<NotFound />} />
           </Routes>
