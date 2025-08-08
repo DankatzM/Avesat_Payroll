@@ -111,7 +111,9 @@ export default function Payroll() {
   // Step 1: Selection state
   const [selectedMonth, setSelectedMonth] = useState('');
   const [selectedYear, setSelectedYear] = useState(new Date().getFullYear().toString());
+  const [processingMode, setProcessingMode] = useState<'batch' | 'single'>('batch');
   const [selectedBatch, setSelectedBatch] = useState<PayrollBatch | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<Employee | null>(null);
   const [availableBatches, setAvailableBatches] = useState<PayrollBatch[]>([]);
   
   // Mock data
