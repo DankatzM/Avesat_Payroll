@@ -696,7 +696,7 @@ export default function Payroll() {
               <CardContent>
                 <div className="space-y-4">
                   <div className="flex items-center justify-between">
-                    <span>Processing {selectedBatch?.name}</span>
+                    <span>Processing {processingMode === 'batch' ? selectedBatch?.name : `${selectedEmployee?.firstName} ${selectedEmployee?.lastName}`}</span>
                     <span>{selectedMonth}/{selectedYear}</span>
                   </div>
                   <Progress value={(currentStep / 7) * 100} className="h-2" />
