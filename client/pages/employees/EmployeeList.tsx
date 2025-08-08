@@ -424,38 +424,14 @@ export default function EmployeeList() {
     });
   };
 
-  // Handle employee deletion
-  const handleDelete = async (employeeId: string) => {
+  // Handle employee deletion (mock implementation)
+  const handleDelete = (employeeId: string) => {
     if (!confirm('Are you sure you want to delete this employee? This action cannot be undone.')) {
       return;
     }
-    
-    try {
-      const employeeToDelete = employees.find(emp => emp.id === employeeId);
-      await employeeService.deleteEmployee(employeeId);
-      setEmployees(employees.filter(emp => emp.id !== employeeId));
-      
-      // Log audit action
-      if (employeeToDelete) {
-        logEmployeeAction(
-          {
-            userId: user?.id || 'unknown',
-            userAgent: navigator.userAgent,
-            ipAddress: '127.0.0.1'
-          },
-          AuditAction.DELETE,
-          employeeId,
-          {
-            firstName: employeeToDelete.firstName,
-            lastName: employeeToDelete.lastName,
-            employeeNumber: employeeToDelete.employeeNumber
-          },
-          undefined
-        );
-      }
-    } catch (err) {
-      alert(handleAPIError(err));
-    }
+
+    // For demo purposes, just show alert - in real app this would call API
+    alert('Employee deletion is not available in demo mode. In production, this would delete the employee from the database.');
   };
 
   // Export employees data
