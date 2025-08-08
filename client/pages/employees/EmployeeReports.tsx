@@ -290,7 +290,7 @@ export default function EmployeeReports() {
 
   // Filter options
   const departments = ['all', ...new Set(employees.map(emp => emp.department))];
-  const hireYears = ['all', ...new Set(employees.map(emp => new Date(emp.hireDate).getFullYear().toString())).sort((a, b) => b.localeCompare(a))];
+  const hireYears = ['all', ...Array.from(new Set(employees.map(emp => new Date(emp.hireDate).getFullYear().toString()))).sort((a, b) => b.localeCompare(a))];
   const salaryRanges = [
     'all',
     '0-500000',
