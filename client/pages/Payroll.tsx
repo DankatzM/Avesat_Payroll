@@ -316,6 +316,16 @@ export default function Payroll() {
     setCurrentStep(2);
 
     try {
+      // Determine the batch to process
+      const processingBatch = processingMode === 'batch'
+        ? selectedBatch!
+        : {
+            id: `single-${selectedEmployee!.id}`,
+            name: `Single Employee: ${selectedEmployee!.firstName} ${selectedEmployee!.lastName}`,
+            employeeCount: 1,
+            employees: [selectedEmployee!]
+          };
+
       // Step 6: Create payroll period
       const period: PayrollPeriod = {
         id: `payroll-${Date.now()}`,
@@ -327,16 +337,16 @@ export default function Payroll() {
         totalNetPay: 0,
         totalDeductions: 0,
         totalTax: 0,
-        employeeCount: selectedBatch.employees.length,
+        employeeCount: processingBatch.employees.length,
         createdAt: new Date().toISOString(),
       };
 
       const calculations: PayrollCalculation[] = [];
-      
+
       // Process each employee
-      for (let i = 0; i < selectedBatch.employees.length; i++) {
-        const employee = selectedBatch.employees[i];
-        setCurrentStep(2 + (i / selectedBatch.employees.length) * 4); // Steps 2-6
+      for (let i = 0; i < processingBatch.employees.length; i++) {
+        const employee = processingBatch.employees[i];
+        setCurrentStep(2 + (i / processingBatch.employees.length) * 4); // Steps 2-6
         
         // Step 2: Retrieve attendance data
         const attendance = generateAttendanceData(employee.id);
