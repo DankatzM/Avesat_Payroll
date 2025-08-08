@@ -140,7 +140,7 @@ const App = () => (
               path="/employees/profile"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Employee Profile" />
+                  <EmployeeProfile />
                 </ProtectedRoute>
               }
             />
