@@ -653,39 +653,46 @@ const App = () => (
 // Create root only once and handle hot module replacement
 const container = document.getElementById("root")!;
 
+// Check if container has existing content
+if (container.innerHTML && !container.querySelector('[data-reactroot]')) {
+  container.innerHTML = '';
+}
+
 // Store root instance globally to persist across HMR
 declare global {
   interface Window {
-    __appRoot?: any;
+    __reactRoot?: any;
   }
 }
 
 // Check if we're in development and handle HMR
 if (import.meta.hot) {
-  // In development with HMR, reuse existing root or create new one
-  const renderApp = () => {
-    if (!window.__appRoot) {
-      // Clear container content before creating new root
-      container.innerHTML = '';
-      window.__appRoot = createRoot(container);
+  // Clean up any existing root first
+  if (window.__reactRoot) {
+    try {
+      window.__reactRoot.unmount();
+    } catch (e) {
+      // Ignore unmount errors during HMR
     }
-    window.__appRoot.render(<App />);
-  };
+    window.__reactRoot = undefined;
+  }
 
-  renderApp();
+  // Ensure container is clean
+  if (!container.querySelector('[data-reactroot]')) {
+    container.innerHTML = '';
+  }
 
-  // Accept HMR updates
+  // Create new root
+  window.__reactRoot = createRoot(container);
+  window.__reactRoot.render(<App />);
+
+  // Accept HMR updates - just re-render, don't recreate root
   import.meta.hot.accept(() => {
-    renderApp();
-  });
-
-  // Clean up on dispose (when HMR removes this module)
-  import.meta.hot.dispose(() => {
-    if (window.__appRoot) {
-      window.__appRoot.unmount();
-      window.__appRoot = undefined;
+    if (window.__reactRoot) {
+      window.__reactRoot.render(<App />);
     }
   });
+
 } else {
   // In production, create root normally
   const root = createRoot(container);
