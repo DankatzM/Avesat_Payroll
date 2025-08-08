@@ -123,7 +123,7 @@ const App = () => (
               path="/employees"
               element={
                 <ProtectedRoute>
-                  <Employees />
+                  <EmployeeList />
                 </ProtectedRoute>
               }
             />
