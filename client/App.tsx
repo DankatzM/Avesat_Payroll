@@ -653,46 +653,19 @@ const App = () => (
 // Create root only once and handle hot module replacement
 const container = document.getElementById("root")!;
 
-// Check if container has existing content
-if (container.innerHTML && !container.querySelector('[data-reactroot]')) {
-  container.innerHTML = '';
-}
-
-// Store root instance globally to persist across HMR
-declare global {
-  interface Window {
-    __reactRoot?: any;
-  }
-}
-
 // Check if we're in development and handle HMR
 if (import.meta.hot) {
-  // Clean up any existing root first
-  if (window.__reactRoot) {
-    try {
-      window.__reactRoot.unmount();
-    } catch (e) {
-      // Ignore unmount errors during HMR
-    }
-    window.__reactRoot = undefined;
-  }
+  // Simple approach: always recreate a clean container and root
+  container.innerHTML = '';
+  const root = createRoot(container);
+  root.render(<App />);
 
-  // Ensure container is clean
-  if (!container.querySelector('[data-reactroot]')) {
-    container.innerHTML = '';
-  }
-
-  // Create new root
-  window.__reactRoot = createRoot(container);
-  window.__reactRoot.render(<App />);
-
-  // Accept HMR updates - just re-render, don't recreate root
+  // Accept HMR updates - recreate everything cleanly
   import.meta.hot.accept(() => {
-    if (window.__reactRoot) {
-      window.__reactRoot.render(<App />);
-    }
+    container.innerHTML = '';
+    const newRoot = createRoot(container);
+    newRoot.render(<App />);
   });
-
 } else {
   // In production, create root normally
   const root = createRoot(container);
