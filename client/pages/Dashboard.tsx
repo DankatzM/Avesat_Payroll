@@ -139,10 +139,21 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="mt-4 sm:mt-0">
-          <Button className="bg-indigo-600 hover:bg-indigo-700">
-            <Calendar className="mr-2 h-4 w-4" />
-            Process Payroll
-          </Button>
+          {hasAnyRole([UserRole.ADMIN, UserRole.HR_MANAGER, UserRole.PAYROLL_OFFICER]) ? (
+            <Link to="/payroll">
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <Calendar className="mr-2 h-4 w-4" />
+                Process Payroll
+              </Button>
+            </Link>
+          ) : (
+            <Link to="/payslips">
+              <Button className="bg-indigo-600 hover:bg-indigo-700">
+                <FileText className="mr-2 h-4 w-4" />
+                View Payslips
+              </Button>
+            </Link>
+          )}
         </div>
       </div>
 
