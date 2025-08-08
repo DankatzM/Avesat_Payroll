@@ -20,9 +20,17 @@ import AuditLogs from "./pages/AuditLogs";
 import { AdminDashboard, HRDashboard, PayrollDashboard, ManagerDashboard, EmployeeDashboard } from "./pages/RoleDashboards";
 import EmployeeDeductions from "./pages/EmployeeDeductions";
 import Settings from "./pages/Settings";
+
+// Dashboard Sub-modules
 import Analytics from "./pages/dashboard/Analytics";
+
+// Employee Sub-modules  
 import AddEmployee from "./pages/employees/AddEmployee";
+import BulkImport from "./pages/employees/BulkImport";
+
+// Payroll Sub-modules
 import PayrollCalendar from "./pages/payroll/Calendar";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -53,7 +61,7 @@ function PlaceholderPage({ title }: { title: string }) {
       <div className="text-center py-12">
         <h1 className="text-2xl font-bold text-gray-900 mb-4">{title}</h1>
         <p className="text-gray-600 mb-6">
-          This page is under development. Continue prompting to build out this functionality.
+          This module is under development and will be available soon.
         </p>
         <div className="w-24 h-24 bg-gray-100 rounded-lg mx-auto mb-4 flex items-center justify-center">
           <div className="w-12 h-12 bg-gray-200 rounded animate-pulse"></div>
@@ -72,6 +80,8 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            
+            {/* Main Dashboard */}
             <Route
               path="/"
               element={
@@ -80,6 +90,34 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+
+            {/* Dashboard Sub-modules */}
+            <Route
+              path="/dashboard/analytics"
+              element={
+                <ProtectedRoute>
+                  <Analytics />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/actions"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Quick Actions" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/dashboard/notifications"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Notifications" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Employee Management */}
             <Route
               path="/employees"
               element={
@@ -89,6 +127,40 @@ const App = () => (
               }
             />
             <Route
+              path="/employees/add"
+              element={
+                <ProtectedRoute>
+                  <AddEmployee />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employees/profile"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Employee Profile" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employees/import"
+              element={
+                <ProtectedRoute>
+                  <BulkImport />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/employees/reports"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Employee Reports" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Payroll Management */}
+            <Route
               path="/payroll"
               element={
                 <ProtectedRoute>
@@ -96,6 +168,48 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/payroll/structure"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Salary Structure" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/calendar"
+              element={
+                <ProtectedRoute>
+                  <PayrollCalendar />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/attendance"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Attendance Integration" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/history"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Payroll History" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payroll/bulk"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Bulk Processing" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Tax Management */}
             <Route
               path="/tax"
               element={
@@ -105,37 +219,55 @@ const App = () => (
               }
             />
             <Route
-              path="/leave"
+              path="/tax/brackets"
               element={
                 <ProtectedRoute>
-                  <LeaveManagement />
+                  <PlaceholderPage title="Tax Brackets Management" />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/payslips"
+              path="/tax/nhif"
               element={
                 <ProtectedRoute>
-                  <Payslips />
+                  <PlaceholderPage title="NHIF Management" />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/reports"
+              path="/tax/nssf"
               element={
                 <ProtectedRoute>
-                  <Reports />
+                  <PlaceholderPage title="NSSF Management" />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/audit"
+              path="/tax/housing"
               element={
                 <ProtectedRoute>
-                  <AuditLogs />
+                  <PlaceholderPage title="Housing Levy" />
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/tax/returns"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Tax Returns" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tax/kra"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="KRA Integration" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Employee Deductions */}
             <Route
               path="/deductions"
               element={
@@ -145,6 +277,264 @@ const App = () => (
               }
             />
             <Route
+              path="/deductions/loans"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Loan Management" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deductions/sacco"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="SACCO Deductions" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deductions/court"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Court Orders" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deductions/welfare"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Welfare Funds" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deductions/history"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Deduction History" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Leave Management */}
+            <Route
+              path="/leave"
+              element={
+                <ProtectedRoute>
+                  <LeaveManagement />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/approval"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Leave Approval" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/balance"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Leave Balance" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/calendar"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Leave Calendar" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/types"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Leave Types" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/holidays"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Public Holidays" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/leave/reports"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Leave Reports" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Payslips */}
+            <Route
+              path="/payslips"
+              element={
+                <ProtectedRoute>
+                  <Payslips />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslips/templates"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Payslip Templates" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslips/bulk"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Bulk Generation" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslips/email"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Email Distribution" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslips/print"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Print Payslips" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/payslips/history"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Payslip History" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Reports */}
+            <Route
+              path="/reports"
+              element={
+                <ProtectedRoute>
+                  <Reports />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/statutory"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Statutory Reports" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/financial"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Financial Reports" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/employees"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Employee Reports" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/custom"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Custom Reports" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/scheduler"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Report Scheduler" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/reports/export"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Export Center" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Audit Logs */}
+            <Route
+              path="/audit"
+              element={
+                <ProtectedRoute>
+                  <AuditLogs />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit/users"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="User Activities" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit/data"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Data Changes" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit/security"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Security Events" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit/logins"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Login History" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/audit/compliance"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Compliance Reports" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Settings */}
+            <Route
               path="/settings"
               element={
                 <ProtectedRoute>
@@ -152,6 +542,64 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
+            <Route
+              path="/settings/payroll"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Payroll Rules" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/statutory"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Statutory Rates" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/users"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="User Management" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/system"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="System Settings" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/integrations"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Integrations" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/backup"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Backup & Restore" />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/settings/help"
+              element={
+                <ProtectedRoute>
+                  <PlaceholderPage title="Help & Support" />
+                </ProtectedRoute>
+              }
+            />
+
+            {/* Role-based Dashboards */}
             <Route
               path="/admin-dashboard"
               element={
@@ -192,32 +640,8 @@ const App = () => (
                 </ProtectedRoute>
               }
             />
-            {/* Sub-module Routes */}
-            <Route
-              path="/dashboard/analytics"
-              element={
-                <ProtectedRoute>
-                  <Analytics />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/employees/add"
-              element={
-                <ProtectedRoute>
-                  <AddEmployee />
-                </ProtectedRoute>
-              }
-            />
-            <Route
-              path="/payroll/calendar"
-              element={
-                <ProtectedRoute>
-                  <PayrollCalendar />
-                </ProtectedRoute>
-              }
-            />
-            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+
+            {/* Catch-all route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
@@ -233,16 +657,16 @@ const container = document.getElementById("root")!;
 if (import.meta.hot) {
   // In development with HMR, we need to handle re-renders differently
   let root: any;
-
+  
   const renderApp = () => {
     if (!root) {
       root = createRoot(container);
     }
     root.render(<App />);
   };
-
+  
   renderApp();
-
+  
   // Accept HMR updates
   import.meta.hot.accept(() => {
     renderApp();
