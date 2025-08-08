@@ -133,6 +133,14 @@ const App = () => (
               }
             />
             <Route
+              path="/deductions"
+              element={
+                <ProtectedRoute>
+                  <EmployeeDeductions />
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="/settings"
               element={
                 <ProtectedRoute>
