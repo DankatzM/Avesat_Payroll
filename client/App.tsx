@@ -176,7 +176,7 @@ const App = () => (
               path="/payroll/structure"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Salary Structure" />
+                  <SalaryStructure />
                 </ProtectedRoute>
               }
             />
