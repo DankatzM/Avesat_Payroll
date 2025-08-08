@@ -34,30 +34,131 @@ export default function EmployeeProfile() {
   const employeeId = searchParams.get('id');
   const { hasAnyRole } = useAuth();
   
+  // Mock employee data
+  const mockEmployees: Employee[] = [
+    {
+      id: '1',
+      employeeNumber: 'EMP001',
+      firstName: 'John',
+      lastName: 'Mwangi',
+      email: 'john.mwangi@company.co.ke',
+      phone: '+254 712 345 678',
+      nationalId: '12345678',
+      address: 'P.O. Box 123, Nairobi, Kenya',
+      dateOfBirth: '1990-05-15',
+      hireDate: '2022-01-15',
+      position: 'Software Engineer',
+      department: 'Engineering',
+      salary: 1200000,
+      payrollCategory: PayrollCategory.MONTHLY,
+      bankDetails: {
+        bankName: 'Equity Bank',
+        accountNumber: '1234567890',
+        sortCode: '680000',
+        accountHolderName: 'John Mwangi',
+      },
+      taxInformation: {
+        kraPin: 'A123456789A',
+        taxCode: 'T1',
+        nhifNumber: 'NHIF123456',
+        nssfNumber: 'NSSF789012',
+        pensionContribution: 5,
+      },
+      isActive: true,
+      createdAt: '2022-01-15T00:00:00Z',
+      updatedAt: '2024-03-15T00:00:00Z',
+    },
+    {
+      id: '2',
+      employeeNumber: 'EMP002',
+      firstName: 'Grace',
+      lastName: 'Wanjiku',
+      email: 'grace.wanjiku@company.co.ke',
+      phone: '+254 722 987 654',
+      nationalId: '23456789',
+      address: 'P.O. Box 456, Nairobi, Kenya',
+      dateOfBirth: '1988-08-22',
+      hireDate: '2021-06-01',
+      position: 'Marketing Manager',
+      department: 'Marketing',
+      salary: 950000,
+      payrollCategory: PayrollCategory.MONTHLY,
+      bankDetails: {
+        bankName: 'KCB Bank',
+        accountNumber: '9876543210',
+        sortCode: '010000',
+        accountHolderName: 'Grace Wanjiku',
+      },
+      taxInformation: {
+        kraPin: 'A987654321B',
+        taxCode: 'T1',
+        nhifNumber: 'NHIF987654',
+        nssfNumber: 'NSSF543210',
+        pensionContribution: 6,
+      },
+      isActive: true,
+      createdAt: '2021-06-01T00:00:00Z',
+      updatedAt: '2024-03-15T00:00:00Z',
+    },
+    {
+      id: '3',
+      employeeNumber: 'EMP003',
+      firstName: 'Samuel',
+      lastName: 'Otieno',
+      email: 'samuel.otieno@company.co.ke',
+      phone: '+254 733 555 123',
+      nationalId: '34567890',
+      address: 'P.O. Box 789, Mombasa, Kenya',
+      dateOfBirth: '1985-12-10',
+      hireDate: '2020-03-15',
+      position: 'Sales Director',
+      department: 'Sales',
+      salary: 1500000,
+      payrollCategory: PayrollCategory.MONTHLY,
+      bankDetails: {
+        bankName: 'Cooperative Bank',
+        accountNumber: '5555555555',
+        sortCode: '070000',
+        accountHolderName: 'Samuel Otieno',
+      },
+      taxInformation: {
+        kraPin: 'A555555555C',
+        taxCode: 'T2',
+        nhifNumber: 'NHIF555555',
+        nssfNumber: 'NSSF111111',
+        pensionContribution: 8,
+      },
+      isActive: true,
+      createdAt: '2020-03-15T00:00:00Z',
+      updatedAt: '2024-03-15T00:00:00Z',
+    }
+  ];
+
   const [employee, setEmployee] = useState<Employee | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Load employee data
-  const loadEmployee = async () => {
+  // Load employee data from mock data
+  const loadEmployee = () => {
     if (!employeeId) {
       setError('No employee ID provided');
       setLoading(false);
       return;
     }
 
-    try {
-      setLoading(true);
-      setError(null);
-      const employeeData = await employeeService.getEmployee(employeeId);
-      setEmployee(employeeData);
-    } catch (err) {
-      const errorMessage = handleAPIError(err);
-      setError(errorMessage);
-      console.error('Error loading employee:', err);
-    } finally {
+    setLoading(true);
+    setError(null);
+
+    // Simulate API delay
+    setTimeout(() => {
+      const foundEmployee = mockEmployees.find(emp => emp.id === employeeId);
+      if (foundEmployee) {
+        setEmployee(foundEmployee);
+      } else {
+        setError('Employee not found');
+      }
       setLoading(false);
-    }
+    }, 500);
   };
 
   useEffect(() => {
