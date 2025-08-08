@@ -650,24 +650,7 @@ const App = () => (
   </QueryClientProvider>
 );
 
-// Create root only once and handle hot module replacement
+// Standard React 18 root initialization
 const container = document.getElementById("root")!;
-
-// Check if we're in development and handle HMR
-if (import.meta.hot) {
-  // Simple approach: always recreate a clean container and root
-  container.innerHTML = '';
-  const root = createRoot(container);
-  root.render(<App />);
-
-  // Accept HMR updates - recreate everything cleanly
-  import.meta.hot.accept(() => {
-    container.innerHTML = '';
-    const newRoot = createRoot(container);
-    newRoot.render(<App />);
-  });
-} else {
-  // In production, create root normally
-  const root = createRoot(container);
-  root.render(<App />);
-}
+const root = createRoot(container);
+root.render(<App />);
