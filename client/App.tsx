@@ -19,6 +19,7 @@ import Reports from "./pages/Reports";
 import AuditLogs from "./pages/AuditLogs";
 import { AdminDashboard, HRDashboard, PayrollDashboard, ManagerDashboard, EmployeeDashboard } from "./pages/RoleDashboards";
 import EmployeeDeductions from "./pages/EmployeeDeductions";
+import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
