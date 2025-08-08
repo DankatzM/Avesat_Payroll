@@ -800,7 +800,15 @@ export default function Payroll() {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <Button variant="ghost" size="sm">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => {
+                              setCurrentRun(run);
+                              setCurrentStep(7);
+                            }}
+                            title="View payroll details"
+                          >
                             <Eye className="h-4 w-4" />
                           </Button>
                         </TableCell>
