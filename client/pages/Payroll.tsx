@@ -710,11 +710,38 @@ export default function Payroll() {
                     <CheckCircle className="mr-2 h-4 w-4" />
                     Approve Payroll
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => window.open('/payslips', '_self')}>
                     <FileText className="mr-2 h-4 w-4" />
                     Generate Payslips
                   </Button>
-                  <Button variant="outline">
+                  <Button variant="outline" onClick={() => {
+                    // Create and download CSV report
+                    const csvData = currentRun.calculations.map(calc => ({
+                      'Employee Number': calc.employee.employeeNumber,
+                      'Employee Name': `${calc.employee.firstName} ${calc.employee.lastName}`,
+                      'Department': calc.employee.department,
+                      'Gross Pay': calc.earnings.gross,
+                      'PAYE Tax': calc.deductions.payeTax,
+                      'NHIF': calc.deductions.nhif,
+                      'NSSF': calc.deductions.nssf,
+                      'Housing Levy': calc.deductions.housingLevy,
+                      'Total Deductions': calc.deductions.total,
+                      'Net Pay': calc.netSalary
+                    }));
+
+                    const csv = [
+                      Object.keys(csvData[0]).join(','),
+                      ...csvData.map(row => Object.values(row).join(','))
+                    ].join('\n');
+
+                    const blob = new Blob([csv], { type: 'text/csv' });
+                    const url = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.href = url;
+                    a.download = `payroll-${selectedMonth}-${selectedYear}.csv`;
+                    a.click();
+                    window.URL.revokeObjectURL(url);
+                  }}>
                     <Download className="mr-2 h-4 w-4" />
                     Export Report
                   </Button>
