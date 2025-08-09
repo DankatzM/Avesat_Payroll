@@ -131,7 +131,6 @@ const TaxManagement: React.FC = () => {
   
   // Algorithm execution state
   const [currentStep, setCurrentStep] = useState(0);
-  const [algorithmProgress, setAlgorithmProgress] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
   const [processingLogs, setProcessingLogs] = useState<string[]>([]);
   
