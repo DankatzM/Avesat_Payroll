@@ -512,7 +512,6 @@ const TaxManagement: React.FC = () => {
   // Step 9: Log audit entries
   const handleStep9_LogAudit = async () => {
     setCurrentStep(9);
-    setAlgorithmProgress(100);
     addProcessingLog(`[STEP 9] LOG audit entries...`);
     
     // Log tax calculation action
