@@ -265,7 +265,7 @@ const App = () => (
               path="/tax/returns"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Tax Returns" />
+                  <TaxReturns />
                 </ProtectedRoute>
               }
             />
