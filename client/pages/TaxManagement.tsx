@@ -266,7 +266,6 @@ const TaxManagement: React.FC = () => {
   // Step 2: Select employees list based on filters
   const handleStep2_SelectEmployees = async () => {
     setCurrentStep(2);
-    setAlgorithmProgress(20);
     addProcessingLog(`[STEP 2] SELECT employees_list based on filters...`);
     
     let filteredEmployees = [...mockEmployeesData];
