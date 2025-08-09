@@ -247,7 +247,7 @@ const App = () => (
               path="/tax/nssf"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="NSSF Management" />
+                  <NSSFManagement />
                 </ProtectedRoute>
               }
             />
