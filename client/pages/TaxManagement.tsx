@@ -664,8 +664,7 @@ const TaxManagement: React.FC = () => {
                 </div>
               </div>
               <div>
-                <h4 className="font-medium mb-2">Current Progress</h4>
-                <Progress value={algorithmProgress} className="mb-4" />
+                <h4 className="font-medium mb-2">Processing Log</h4>
                 <div className="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto">
                   {processingLogs.map((log, index) => (
                     <div key={index} className="text-xs font-mono mb-1">{log}</div>
