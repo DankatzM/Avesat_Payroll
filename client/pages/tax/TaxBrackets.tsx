@@ -127,7 +127,7 @@ const TaxBrackets: React.FC = () => {
 
   // Filtering state
   const [filterStatus, setFilterStatus] = useState<string>('all');
-  const [filterYear, setFilterYear] = useState<string>(new Date().getFullYear().toString());
+  const [filterYear, setFilterYear] = useState<string>('2025');
 
   // Load tax brackets and convert Kenya brackets to our format
   useEffect(() => {
