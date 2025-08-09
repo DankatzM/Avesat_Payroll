@@ -10,7 +10,7 @@ export interface KenyaTaxBracket {
   cumulativeMax: number;
 }
 
-// Kenya PAYE Tax Brackets 2024 (Annual amounts in KES)
+// Kenya PAYE Tax Brackets 2025 (Annual amounts in KES)
 export const KENYA_TAX_BRACKETS: KenyaTaxBracket[] = [
   { min: 0, max: 288000, rate: 0.10, cumulativeMax: 28800 },
   { min: 288001, max: 388000, rate: 0.25, cumulativeMax: 53800 },
@@ -19,15 +19,15 @@ export const KENYA_TAX_BRACKETS: KenyaTaxBracket[] = [
   { min: 9600001, max: Infinity, rate: 0.35, cumulativeMax: Infinity }
 ];
 
-// Kenya tax constants (2024)
+// Kenya tax constants (2025)
 export const KENYA_TAX_CONSTANTS = {
   PERSONAL_RELIEF: 28800, // Annual personal relief in KES
   INSURANCE_RELIEF_LIMIT: 60000, // Maximum insurance relief per year
   PENSION_RELIEF_RATE: 0.30, // 30% of pension contribution
   PENSION_RELIEF_LIMIT: 240000, // Maximum pension relief per year
   
-  // NHIF rates (monthly)
-  NHIF_RATES: [
+  // SHIF rates (monthly) - Social Health Insurance Fund
+  SHIF_RATES: [
     { min: 0, max: 5999, amount: 150 },
     { min: 6000, max: 7999, amount: 300 },
     { min: 8000, max: 11999, amount: 400 },
@@ -47,13 +47,13 @@ export const KENYA_TAX_CONSTANTS = {
     { min: 100000, max: Infinity, amount: 1700 }
   ],
   
-  // NSSF rates (2024)
+  // NSSF rates (2025)
   NSSF_TIER_1_RATE: 0.06, // 6% of pensionable earnings (max KES 1080)
   NSSF_TIER_1_LIMIT: 18000, // Monthly limit for tier 1
   NSSF_TIER_2_RATE: 0.06, // 6% of pensionable earnings above tier 1
   NSSF_TIER_2_LIMIT: 18000, // Monthly limit for tier 2 (KES 18,000)
   
-  // Housing Levy (2024)
+  // Housing Levy (2025)
   HOUSING_LEVY_RATE: 0.015, // 1.5% of gross salary
   HOUSING_LEVY_LIMIT: 5000, // Maximum monthly deduction
 };
@@ -65,7 +65,7 @@ export interface KenyaTaxCalculationResult {
   payeTax: number;
   personalRelief: number;
   netTax: number;
-  nhifDeduction: number;
+  shifDeduction: number;
   nssfTier1: number;
   nssfTier2: number;
   totalNssf: number;
@@ -100,10 +100,10 @@ export function calculateKenyaPAYE(annualIncome: number): { tax: number; bracket
 }
 
 /**
- * Calculate NHIF deduction based on gross salary
+ * Calculate SHIF deduction based on gross salary
  */
-export function calculateNHIF(grossSalary: number): number {
-  for (const rate of KENYA_TAX_CONSTANTS.NHIF_RATES) {
+export function calculateSHIF(grossSalary: number): number {
+  for (const rate of KENYA_TAX_CONSTANTS.SHIF_RATES) {
     if (grossSalary >= rate.min && grossSalary <= rate.max) {
       return rate.amount;
     }
@@ -168,11 +168,11 @@ export function calculateKenyaPayroll(
   const netTax = Math.max(0, monthlyPayeTax - monthlyPersonalRelief);
   
   // Calculate other deductions
-  const nhifDeduction = calculateNHIF(grossMonthlySalary);
+  const shifDeduction = calculateSHIF(grossMonthlySalary);
   const housingLevy = calculateHousingLevy(grossMonthlySalary);
-  
+
   // Total deductions
-  const totalDeductions = netTax + nhifDeduction + nssf.total + housingLevy + pensionContribution;
+  const totalDeductions = netTax + shifDeduction + nssf.total + housingLevy + pensionContribution;
   
   // Net salary
   const netSalary = grossMonthlySalary - totalDeductions;
@@ -184,7 +184,7 @@ export function calculateKenyaPayroll(
     payeTax: Math.round(monthlyPayeTax),
     personalRelief: Math.round(monthlyPersonalRelief),
     netTax: Math.round(netTax),
-    nhifDeduction: nhifDeduction,
+    shifDeduction: shifDeduction,
     nssfTier1: nssf.tier1,
     nssfTier2: nssf.tier2,
     totalNssf: nssf.total,
