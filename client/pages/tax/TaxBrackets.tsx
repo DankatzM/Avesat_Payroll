@@ -154,17 +154,17 @@ const TaxBrackets: React.FC = () => {
     // Add some mock historical brackets
     const historicalBrackets: TaxBracket[] = [
       {
-        id: 'kra-2023-1',
+        id: 'kra-2024-1',
         min: 0,
         max: 288000,
         rate: 10,
-        description: 'KRA 2023 Tax Bracket 1 (Expired)',
-        effectiveDate: '2023-01-01',
-        expiryDate: '2023-12-31',
+        description: 'KRA 2024 Tax Bracket 1 (Expired)',
+        effectiveDate: '2024-01-01',
+        expiryDate: '2024-12-31',
         status: 'expired',
         createdBy: 'system',
-        createdAt: '2023-01-01T00:00:00.000Z',
-        updatedAt: '2023-12-31T23:59:59.000Z'
+        createdAt: '2024-01-01T00:00:00.000Z',
+        updatedAt: '2024-12-31T23:59:59.000Z'
       }
     ];
 
