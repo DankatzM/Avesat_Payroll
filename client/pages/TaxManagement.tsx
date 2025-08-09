@@ -126,7 +126,7 @@ const TaxManagement: React.FC = () => {
   // Form state
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>({
     month: new Date().getMonth() + 1,
-    year: new Date().getFullYear(),
+    year: 2025,
     description: ''
   });
   
