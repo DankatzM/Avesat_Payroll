@@ -624,14 +624,6 @@ const TaxManagement: React.FC = () => {
           <p className="text-gray-600">Kenya Revenue Authority (KRA) compliant tax calculation system</p>
         </div>
         <div className="flex gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setShowAlgorithmDetails(true)}
-            className="flex items-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            Algorithm Details
-          </Button>
           <Badge className="bg-green-100 text-green-800">
             <Shield className="w-4 h-4 mr-1" />
             KRA 2024 Compliant
