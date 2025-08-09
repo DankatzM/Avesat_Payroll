@@ -281,13 +281,12 @@ const TaxManagement: React.FC = () => {
     setEmployeesList(filteredEmployees);
     
     await new Promise(resolve => setTimeout(resolve, 800));
-    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
+    addProcessingLog(`[STEP 2] ��� Selected ${filteredEmployees.length} employees for processing`);
   };
 
   // Step 3: Load PAYE tax table
   const handleStep3_LoadTaxTable = async () => {
     setCurrentStep(3);
-    setAlgorithmProgress(30);
     addProcessingLog(`[STEP 3] LOAD PAYE_tax_table FROM system_settings...`);
     
     // Load and validate tax brackets
