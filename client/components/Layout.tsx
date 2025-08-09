@@ -122,7 +122,7 @@ const navigationItems: NavigationItem[] = [
     subModules: [
       { name: 'PAYE Calculation', href: '/tax', icon: Percent, description: 'Calculate PAYE tax' },
       { name: 'Tax Brackets', href: '/tax/brackets', icon: Calculator, description: 'Manage KRA tax brackets' },
-      { name: 'NHIF Management', href: '/tax/nhif', icon: Heart, description: 'NHIF contributions and bands' },
+      { name: 'SHIF Management', href: '/tax/shif', icon: Heart, description: 'SHIF contributions and bands' },
       { name: 'NSSF Management', href: '/tax/nssf', icon: PiggyBank, description: 'NSSF pension contributions' },
       { name: 'Housing Levy', href: '/tax/housing', icon: Building2, description: 'Housing development levy' },
       { name: 'Tax Returns', href: '/tax/returns', icon: FileText, description: 'Generate tax return forms' },
