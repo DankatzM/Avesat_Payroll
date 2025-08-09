@@ -257,7 +257,7 @@ const App = () => (
               path="/tax/housing"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Housing Levy" />
+                  <HousingLevy />
                 </ProtectedRoute>
               }
             />
