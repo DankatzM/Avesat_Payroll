@@ -415,7 +415,6 @@ const TaxManagement: React.FC = () => {
   // Step 6: Validate PAYE against KRA calculator
   const handleStep6_ValidatePAYE = async () => {
     setCurrentStep(6);
-    setAlgorithmProgress(70);
     addProcessingLog(`[STEP 6] VALIDATE PAYE against KRA calculator...`);
     
     const validationResults = payeCalculations.map(calc => {
