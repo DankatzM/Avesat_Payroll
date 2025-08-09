@@ -229,7 +229,7 @@ const App = () => (
               path="/tax/brackets"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Tax Brackets Management" />
+                  <TaxBrackets />
                 </ProtectedRoute>
               }
             />
