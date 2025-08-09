@@ -558,7 +558,7 @@ const TaxManagement: React.FC = () => {
         <div className="flex gap-2">
           <Badge className="bg-green-100 text-green-800">
             <Shield className="w-4 h-4 mr-1" />
-            KRA 2024 Compliant
+            KRA 2025 Compliant
           </Badge>
         </div>
       </div>
