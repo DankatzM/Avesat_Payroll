@@ -981,7 +981,7 @@ const TaxManagement: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Settings className="w-5 h-5" />
-                PAYE Tax Brackets (2024)
+                PAYE Tax Brackets (2025)
               </CardTitle>
             </CardHeader>
             <CardContent>
