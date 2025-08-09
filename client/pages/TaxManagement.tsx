@@ -487,7 +487,6 @@ const TaxManagement: React.FC = () => {
   // Step 8: Prepare iTax submission file
   const handleStep8_PrepareiTax = async () => {
     setCurrentStep(8);
-    setAlgorithmProgress(90);
     addProcessingLog(`[STEP 8] PREPARE iTax submission file...`);
     
     // Format iTax CSV file according to KRA template
