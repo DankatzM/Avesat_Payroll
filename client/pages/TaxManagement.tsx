@@ -281,7 +281,7 @@ const TaxManagement: React.FC = () => {
     setEmployeesList(filteredEmployees);
     
     await new Promise(resolve => setTimeout(resolve, 800));
-    addProcessingLog(`[STEP 2] ��� Selected ${filteredEmployees.length} employees for processing`);
+    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
   };
 
   // Step 3: Load PAYE tax table
@@ -299,7 +299,6 @@ const TaxManagement: React.FC = () => {
   // Step 4: Load statutory reliefs
   const handleStep4_LoadReliefs = async () => {
     setCurrentStep(4);
-    setAlgorithmProgress(40);
     addProcessingLog(`[STEP 4] LOAD statutory_reliefs...`);
     
     // Validate reliefs are loaded
