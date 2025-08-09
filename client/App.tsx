@@ -35,6 +35,9 @@ import EmployeeReports from "./pages/employees/EmployeeReports";
 import PayrollCalendar from "./pages/payroll/Calendar";
 import SalaryStructure from "./pages/payroll/SalaryStructure";
 
+// Tax Management Sub-modules
+import TaxBrackets from "./pages/tax/TaxBrackets";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
