@@ -313,14 +313,12 @@ const TaxManagement: React.FC = () => {
   // Step 5: Calculate PAYE for each employee
   const handleStep5_CalculatePAYE = async () => {
     setCurrentStep(5);
-    setAlgorithmProgress(50);
     addProcessingLog(`[STEP 5] FOR each employee: CALCULATE PAYE...`);
-    
+
     const calculations: PAYECalculation[] = [];
-    
+
     for (let i = 0; i < employeesList.length; i++) {
       const employee = employeesList[i];
-      setAlgorithmProgress(50 + (i / employeesList.length) * 20);
       
       addProcessingLog(`[STEP 5.${i+1}] Processing ${employee.employeeName}...`);
       
