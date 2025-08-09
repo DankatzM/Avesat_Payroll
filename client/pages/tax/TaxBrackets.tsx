@@ -139,7 +139,7 @@ const TaxBrackets: React.FC = () => {
     
     // Convert Kenya tax brackets to our extended format
     const convertedBrackets: TaxBracket[] = KENYA_TAX_BRACKETS.map((bracket, index) => ({
-      id: `kra-2024-${index + 1}`,
+      id: `kra-2025-${index + 1}`,
       min: bracket.min,
       max: bracket.max === Infinity ? 999999999 : bracket.max,
       rate: bracket.rate * 100, // Convert to percentage
