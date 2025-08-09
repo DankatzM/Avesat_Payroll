@@ -147,8 +147,8 @@ const TaxBrackets: React.FC = () => {
       effectiveDate: '2025-01-01',
       status: 'active' as const,
       createdBy: 'system',
-      createdAt: '2024-01-01T00:00:00.000Z',
-      updatedAt: '2024-01-01T00:00:00.000Z'
+      createdAt: '2025-01-01T00:00:00.000Z',
+      updatedAt: '2025-01-01T00:00:00.000Z'
     }));
 
     // Add some mock historical brackets
