@@ -39,6 +39,8 @@ import SalaryStructure from "./pages/payroll/SalaryStructure";
 import TaxBrackets from "./pages/tax/TaxBrackets";
 import SHIFManagement from "./pages/tax/SHIFManagement";
 import NSSFManagement from "./pages/tax/NSSFManagement";
+import TaxReturns from "./pages/tax/TaxReturns";
+import HousingLevy from "./pages/tax/HousingLevy";
 
 import NotFound from "./pages/NotFound";
 
