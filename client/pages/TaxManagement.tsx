@@ -165,7 +165,6 @@ const TaxManagement: React.FC = () => {
   
   // UI state
   const [selectedTab, setSelectedTab] = useState('calculation');
-  const [showAlgorithmDetails, setShowAlgorithmDetails] = useState(false);
   
   // Algorithm steps definition
   const algorithmSteps: AlgorithmStep[] = [
@@ -280,7 +279,7 @@ const TaxManagement: React.FC = () => {
     setEmployeesList(filteredEmployees);
     
     await new Promise(resolve => setTimeout(resolve, 800));
-    addProcessingLog(`[STEP 2] ��� Selected ${filteredEmployees.length} employees for processing`);
+    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
   };
 
   // Step 3: Load PAYE tax table
