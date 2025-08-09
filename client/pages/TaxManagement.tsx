@@ -799,11 +799,10 @@ const TaxManagement: React.FC = () => {
               </CardHeader>
               <CardContent>
                 <div className="space-y-4">
-                  <Progress value={algorithmProgress} className="w-full" />
                   <div className="text-center text-sm text-gray-600">
-                    Step {currentStep} of {algorithmSteps.length} - {algorithmProgress}% Complete
+                    Step {currentStep} of {algorithmSteps.length}
                   </div>
-                  
+
                   <div className="bg-gray-50 p-4 rounded-lg h-64 overflow-y-auto">
                     <h4 className="font-medium mb-2">Processing Log</h4>
                     {processingLogs.length === 0 ? (
