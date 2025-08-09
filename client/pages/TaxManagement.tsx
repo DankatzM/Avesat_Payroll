@@ -543,7 +543,6 @@ const TaxManagement: React.FC = () => {
       setIsProcessing(true);
       setProcessingLogs([]);
       setCurrentStep(0);
-      setAlgorithmProgress(0);
       
       await handleStep1_InputPeriod();
       await handleStep2_SelectEmployees();
