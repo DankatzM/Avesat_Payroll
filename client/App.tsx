@@ -234,10 +234,10 @@ const App = () => (
               }
             />
             <Route
-              path="/tax/nhif"
+              path="/tax/shif"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="NHIF Management" />
+                  <PlaceholderPage title="SHIF Management" />
                 </ProtectedRoute>
               }
             />
