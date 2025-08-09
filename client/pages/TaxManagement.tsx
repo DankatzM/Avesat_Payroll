@@ -253,7 +253,6 @@ const TaxManagement: React.FC = () => {
   // Step 1: Input payroll period and filters
   const handleStep1_InputPeriod = async () => {
     setCurrentStep(1);
-    setAlgorithmProgress(10);
     addProcessingLog(`[STEP 1] INPUT payroll_period: ${payrollPeriod.month}/${payrollPeriod.year}`);
     
     if (!payrollPeriod.month || !payrollPeriod.year) {
