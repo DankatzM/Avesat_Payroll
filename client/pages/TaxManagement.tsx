@@ -441,7 +441,6 @@ const TaxManagement: React.FC = () => {
   // Step 7: Generate reports
   const handleStep7_GenerateReports = async () => {
     setCurrentStep(7);
-    setAlgorithmProgress(80);
     addProcessingLog(`[STEP 7] GENERATE reports (P10, P10A, P9A)...`);
     
     const reports: TaxReport[] = [];
