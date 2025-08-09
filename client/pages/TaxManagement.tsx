@@ -280,7 +280,7 @@ const TaxManagement: React.FC = () => {
     setEmployeesList(filteredEmployees);
     
     await new Promise(resolve => setTimeout(resolve, 800));
-    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
+    addProcessingLog(`[STEP 2] ��� Selected ${filteredEmployees.length} employees for processing`);
   };
 
   // Step 3: Load PAYE tax table
@@ -631,41 +631,6 @@ const TaxManagement: React.FC = () => {
         </div>
       </div>
 
-      {/* Algorithm Details Dialog */}
-      <Dialog open={showAlgorithmDetails} onOpenChange={setShowAlgorithmDetails}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>PAYE Tax Calculation Algorithm</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <h4 className="font-medium mb-2">Algorithm Steps</h4>
-                <div className="space-y-2">
-                  {algorithmSteps.map((step, index) => (
-                    <div key={index} className="flex items-center gap-2 p-2 border rounded">
-                      <div className={`w-6 h-6 rounded-full flex items-center justify-center text-xs ${
-                        currentStep >= step.step ? 'bg-green-500 text-white' : 'bg-gray-200'
-                      }`}>
-                        {step.step}
-                      </div>
-                      <span className="text-sm">{step.title}</span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-              <div>
-                <h4 className="font-medium mb-2">Processing Log</h4>
-                <div className="bg-gray-50 p-4 rounded-lg max-h-60 overflow-y-auto">
-                  {processingLogs.map((log, index) => (
-                    <div key={index} className="text-xs font-mono mb-1">{log}</div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
 
       <Tabs value={selectedTab} onValueChange={setSelectedTab} className="space-y-6">
         <TabsList className="grid w-full grid-cols-5">
