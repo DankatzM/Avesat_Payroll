@@ -117,21 +117,12 @@ interface TaxReport {
   totalPAYE: number;
 }
 
-interface AlgorithmStep {
-  step: number;
-  title: string;
-  status: 'pending' | 'in_progress' | 'completed' | 'error';
-  message?: string;
-  progress?: number;
-}
 
 const TaxManagement: React.FC = () => {
   const { user, hasAnyRole } = useAuth();
   
   // Algorithm execution state
-  const [currentStep, setCurrentStep] = useState(0);
   const [isProcessing, setIsProcessing] = useState(false);
-  const [processingLogs, setProcessingLogs] = useState<string[]>([]);
   
   // Form state
   const [payrollPeriod, setPayrollPeriod] = useState<PayrollPeriod>({
@@ -166,18 +157,6 @@ const TaxManagement: React.FC = () => {
   // UI state
   const [selectedTab, setSelectedTab] = useState('calculation');
   
-  // Algorithm steps definition
-  const algorithmSteps: AlgorithmStep[] = [
-    { step: 1, title: 'INPUT payroll_period (month, year)', status: 'pending' },
-    { step: 2, title: 'SELECT employees_list based on filters', status: 'pending' },
-    { step: 3, title: 'LOAD PAYE_tax_table FROM system_settings', status: 'pending' },
-    { step: 4, title: 'LOAD statutory_reliefs', status: 'pending' },
-    { step: 5, title: 'FOR each employee: CALCULATE PAYE', status: 'pending' },
-    { step: 6, title: 'VALIDATE PAYE against KRA calculator', status: 'pending' },
-    { step: 7, title: 'GENERATE reports (P10, P10A, P9A)', status: 'pending' },
-    { step: 8, title: 'PREPARE iTax submission file', status: 'pending' },
-    { step: 9, title: 'LOG audit entries', status: 'pending' }
-  ];
   
   // Mock data for demonstration
   const mockEmployeesData: PayrollRecord[] = [
@@ -250,75 +229,54 @@ const TaxManagement: React.FC = () => {
 
   // Step 1: Input payroll period and filters
   const handleStep1_InputPeriod = async () => {
-    setCurrentStep(1);
-    addProcessingLog(`[STEP 1] INPUT payroll_period: ${payrollPeriod.month}/${payrollPeriod.year}`);
-    
     if (!payrollPeriod.month || !payrollPeriod.year) {
       throw new Error('Payroll period is required');
     }
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    addProcessingLog(`[STEP 1] ✓ Payroll period validated: ${getMonthName(payrollPeriod.month)} ${payrollPeriod.year}`);
   };
 
   // Step 2: Select employees list based on filters
   const handleStep2_SelectEmployees = async () => {
-    setCurrentStep(2);
-    addProcessingLog(`[STEP 2] SELECT employees_list based on filters...`);
-    
     let filteredEmployees = [...mockEmployeesData];
-    
+
     // Apply department filter
     if (employeeFilters.department !== 'all') {
-      filteredEmployees = filteredEmployees.filter(emp => 
+      filteredEmployees = filteredEmployees.filter(emp =>
         emp.department.toLowerCase() === employeeFilters.department.toLowerCase()
       );
     }
-    
+
     // Apply other filters as needed
     setEmployeesList(filteredEmployees);
-    
+
     await new Promise(resolve => setTimeout(resolve, 800));
-    addProcessingLog(`[STEP 2] ✓ Selected ${filteredEmployees.length} employees for processing`);
   };
 
   // Step 3: Load PAYE tax table
   const handleStep3_LoadTaxTable = async () => {
-    setCurrentStep(3);
-    addProcessingLog(`[STEP 3] LOAD PAYE_tax_table FROM system_settings...`);
-    
     // Load and validate tax brackets
     setTaxBrackets(KENYA_TAX_BRACKETS);
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    addProcessingLog(`[STEP 3] ✓ Loaded ${KENYA_TAX_BRACKETS.length} tax brackets from KRA 2024 table`);
   };
 
   // Step 4: Load statutory reliefs
   const handleStep4_LoadReliefs = async () => {
-    setCurrentStep(4);
-    addProcessingLog(`[STEP 4] LOAD statutory_reliefs...`);
-    
     // Validate reliefs are loaded
     if (!statutoryReliefs.personalRelief) {
       throw new Error('Personal relief not configured');
     }
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    addProcessingLog(`[STEP 4] ✓ Loaded reliefs: Personal (${formatKES(statutoryReliefs.personalRelief)}), Insurance (${formatKES(statutoryReliefs.insuranceRelief)}), Pension (${formatKES(statutoryReliefs.pensionRelief)})`);
   };
 
   // Step 5: Calculate PAYE for each employee
   const handleStep5_CalculatePAYE = async () => {
-    setCurrentStep(5);
-    addProcessingLog(`[STEP 5] FOR each employee: CALCULATE PAYE...`);
-
     const calculations: PAYECalculation[] = [];
 
     for (let i = 0; i < employeesList.length; i++) {
       const employee = employeesList[i];
-      
-      addProcessingLog(`[STEP 5.${i+1}] Processing ${employee.employeeName}...`);
       
       // 1. FETCH gross_pay
       const grossPay = employee.grossPay;
@@ -407,40 +365,31 @@ const TaxManagement: React.FC = () => {
     }
     
     setPayeCalculations(calculations);
-    addProcessingLog(`[STEP 5] ✓ Calculated PAYE for ${calculations.length} employees`);
   };
 
   // Step 6: Validate PAYE against KRA calculator
   const handleStep6_ValidatePAYE = async () => {
-    setCurrentStep(6);
-    addProcessingLog(`[STEP 6] VALIDATE PAYE against KRA calculator...`);
-    
     const validationResults = payeCalculations.map(calc => {
       // Mock validation - in real system, this would call KRA API
       const expectedPAYE = calc.payeAmount; // Assuming our calculation is correct
       const discrepancy = Math.abs(calc.payeAmount - expectedPAYE);
       const allowedThreshold = 10; // KES 10 tolerance
-      
+
       return {
         ...calc,
         validationStatus: discrepancy > allowedThreshold ? 'flagged' : 'valid',
         discrepancy: discrepancy
       };
     });
-    
+
     setPayeCalculations(validationResults);
     setValidationResults(validationResults);
-    
+
     await new Promise(resolve => setTimeout(resolve, 800));
-    const flaggedCount = validationResults.filter(r => r.validationStatus === 'flagged').length;
-    addProcessingLog(`[STEP 6] ✓ Validation complete. ${flaggedCount} records flagged for review`);
   };
 
   // Step 7: Generate reports
   const handleStep7_GenerateReports = async () => {
-    setCurrentStep(7);
-    addProcessingLog(`[STEP 7] GENERATE reports (P10, P10A, P9A)...`);
-    
     const reports: TaxReport[] = [];
     
     // Generate P10 report (Monthly employee deductions)
@@ -477,16 +426,12 @@ const TaxManagement: React.FC = () => {
     });
     
     setGeneratedReports(reports);
-    
+
     await new Promise(resolve => setTimeout(resolve, 1000));
-    addProcessingLog(`[STEP 7] ✓ Generated ${reports.length} reports (P10, P10A)`);
   };
 
   // Step 8: Prepare iTax submission file
   const handleStep8_PrepareiTax = async () => {
-    setCurrentStep(8);
-    addProcessingLog(`[STEP 8] PREPARE iTax submission file...`);
-    
     // Format iTax CSV file according to KRA template
     const csvHeaders = ['Employee ID', 'Employee Name', 'Taxable Pay', 'PAYE Deduction'];
     const csvData = payeCalculations.map(calc => [
@@ -495,23 +440,19 @@ const TaxManagement: React.FC = () => {
       calc.taxableIncome.toString(),
       calc.payeAmount.toString()
     ]);
-    
+
     const csvContent = [csvHeaders, ...csvData]
       .map(row => row.join(','))
       .join('\n');
-    
+
     const blob = new Blob([csvContent], { type: 'text/csv' });
     setITaxFile(blob);
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    addProcessingLog(`[STEP 8] ✓ iTax submission file prepared (${blob.size} bytes)`);
   };
 
   // Step 9: Log audit entries
   const handleStep9_LogAudit = async () => {
-    setCurrentStep(9);
-    addProcessingLog(`[STEP 9] LOG audit entries...`);
-    
     // Log tax calculation action
     logTaxAction(
       {
@@ -529,19 +470,15 @@ const TaxManagement: React.FC = () => {
         flaggedRecords: payeCalculations.filter(calc => calc.validationStatus === 'flagged').length
       }
     );
-    
+
     await new Promise(resolve => setTimeout(resolve, 500));
-    addProcessingLog(`[STEP 9] ✓ Audit entries logged successfully`);
-    addProcessingLog(`[COMPLETE] Tax calculation algorithm completed successfully!`);
   };
 
   // Execute complete algorithm
   const executeCompleteAlgorithm = async () => {
     try {
       setIsProcessing(true);
-      setProcessingLogs([]);
-      setCurrentStep(0);
-      
+
       await handleStep1_InputPeriod();
       await handleStep2_SelectEmployees();
       await handleStep3_LoadTaxTable();
@@ -551,18 +488,15 @@ const TaxManagement: React.FC = () => {
       await handleStep7_GenerateReports();
       await handleStep8_PrepareiTax();
       await handleStep9_LogAudit();
-      
+
     } catch (error) {
-      addProcessingLog(`[ERROR] ${error}`);
+      console.error('Tax calculation error:', error);
     } finally {
       setIsProcessing(false);
     }
   };
 
   // Helper functions
-  const addProcessingLog = (message: string) => {
-    setProcessingLogs(prev => [...prev, `${new Date().toLocaleTimeString()}: ${message}`]);
-  };
 
   const getMonthName = (month: number) => {
     const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -744,35 +678,6 @@ const TaxManagement: React.FC = () => {
               </CardContent>
             </Card>
 
-            {/* Progress Section */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Clock className="w-5 h-5" />
-                  Algorithm Progress
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-4">
-                  <div className="text-center text-sm text-gray-600">
-                    Step {currentStep} of {algorithmSteps.length}
-                  </div>
-
-                  <div className="bg-gray-50 p-4 rounded-lg h-64 overflow-y-auto">
-                    <h4 className="font-medium mb-2">Processing Log</h4>
-                    {processingLogs.length === 0 ? (
-                      <p className="text-sm text-gray-500">Click "Execute Algorithm" to start processing</p>
-                    ) : (
-                      <div className="space-y-1">
-                        {processingLogs.map((log, index) => (
-                          <div key={index} className="text-xs font-mono">{log}</div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
           </div>
 
           {/* Employee Selection Preview */}
