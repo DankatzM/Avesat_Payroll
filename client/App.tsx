@@ -238,7 +238,7 @@ const App = () => (
               path="/tax/shif"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="SHIF Management" />
+                  <SHIFManagement />
                 </ProtectedRoute>
               }
             />
