@@ -143,8 +143,8 @@ const TaxBrackets: React.FC = () => {
       min: bracket.min,
       max: bracket.max === Infinity ? 999999999 : bracket.max,
       rate: bracket.rate * 100, // Convert to percentage
-      description: `KRA 2024 Tax Bracket ${index + 1}`,
-      effectiveDate: '2024-01-01',
+      description: `KRA 2025 Tax Bracket ${index + 1}`,
+      effectiveDate: '2025-01-01',
       status: 'active' as const,
       createdBy: 'system',
       createdAt: '2024-01-01T00:00:00.000Z',
