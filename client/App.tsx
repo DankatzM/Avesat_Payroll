@@ -38,6 +38,7 @@ import SalaryStructure from "./pages/payroll/SalaryStructure";
 // Tax Management Sub-modules
 import TaxBrackets from "./pages/tax/TaxBrackets";
 import SHIFManagement from "./pages/tax/SHIFManagement";
+import NSSFManagement from "./pages/tax/NSSFManagement";
 
 import NotFound from "./pages/NotFound";
 
