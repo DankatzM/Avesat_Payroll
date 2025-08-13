@@ -9,15 +9,15 @@
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
-    "build:cpanel": "vite build --config vite.config.cpanel.ts",
+    "build:cpanel": "vite build --config vite.config.cpanel.ts && npm run copy:cpanel-assets",
     "start": "node dist/server/node-build.mjs",
     "preview": "vite preview --config vite.config.cpanel.ts",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
     "typecheck": "tsc",
-    "deploy:cpanel": "npm run build:cpanel && npm run copy:api",
-    "copy:api": "cp -r api dist/cpanel/ && cp .env.example dist/cpanel/ && cp CPANEL_DEPLOYMENT.md dist/cpanel/ && cp public/.htaccess dist/cpanel/",
-    "zip:cpanel": "npm run deploy:cpanel && cd dist/cpanel && zip -r ../../avesat-payroll-cpanel.zip ."
+    "copy:cpanel-assets": "cp -r dist/cpanel/* cpanel-upload/ 2>/dev/null || true",
+    "prepare:cpanel": "npm run build:cpanel",
+    "zip:cpanel": "npm run prepare:cpanel && cd cpanel-upload && zip -r ../avesat-payroll-cpanel.zip . -x '*.DS_Store' '*/.*'"
   },
   "dependencies": {
     "dotenv": "^17.2.0",
