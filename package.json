@@ -1,24 +1,23 @@
 {
-  "name": "fusion-starter",
+  "name": "avesat-payroll-system",
   "private": true,
   "type": "module",
-  "pkg": {
-    "assets": [
-      "dist/spa/*"
-    ],
-    "scripts": [
-      "dist/server/**/*.js"
-    ]
-  },
+  "version": "1.0.0",
+  "description": "Kenya-focused payroll management system for cPanel deployment",
   "scripts": {
     "dev": "vite",
     "build": "npm run build:client && npm run build:server",
     "build:client": "vite build",
     "build:server": "vite build --config vite.config.server.ts",
+    "build:cpanel": "vite build --config vite.config.cpanel.ts",
     "start": "node dist/server/node-build.mjs",
+    "preview": "vite preview --config vite.config.cpanel.ts",
     "test": "vitest --run",
     "format.fix": "prettier --write .",
-    "typecheck": "tsc"
+    "typecheck": "tsc",
+    "deploy:cpanel": "npm run build:cpanel && npm run copy:api",
+    "copy:api": "cp -r api dist/cpanel/ && cp .env.example dist/cpanel/ && cp CPANEL_DEPLOYMENT.md dist/cpanel/ && cp public/.htaccess dist/cpanel/",
+    "zip:cpanel": "npm run deploy:cpanel && cd dist/cpanel && zip -r ../../avesat-payroll-cpanel.zip ."
   },
   "dependencies": {
     "dotenv": "^17.2.0",
@@ -98,5 +97,16 @@
     "vaul": "^0.9.3",
     "vite": "^6.2.2",
     "vitest": "^3.1.4"
-  }
+  },
+  "keywords": [
+    "payroll",
+    "kenya",
+    "cpanel",
+    "php",
+    "mysql",
+    "react",
+    "typescript"
+  ],
+  "author": "Avesat Systems",
+  "license": "MIT"
 }
