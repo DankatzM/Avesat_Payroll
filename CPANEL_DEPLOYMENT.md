@@ -74,11 +74,13 @@ public_html/
 ### 3.2 Security Configuration
 
 1. **Remove database files** after setup:
+
    ```bash
    rm -rf database/
    ```
 
 2. **Update file permissions**:
+
    ```bash
    chmod 600 .env
    chmod 644 api/config/*.php
@@ -120,6 +122,7 @@ Update the frontend to point to your cPanel API:
 Visit: `https://yourdomain.com/api/health`
 
 Should return:
+
 ```json
 {
   "status": "ok",
@@ -130,6 +133,7 @@ Should return:
 ### 5.2 Test Authentication
 
 **Login Test:**
+
 ```bash
 curl -X POST https://yourdomain.com/api/auth/login \
   -H "Content-Type: application/json" \
@@ -141,6 +145,7 @@ curl -X POST https://yourdomain.com/api/auth/login \
 Visit: `https://yourdomain.com`
 
 Default login credentials (change immediately):
+
 - Email: `admin@avesat.com`
 - Password: `password123`
 
@@ -156,6 +161,7 @@ Default login credentials (change immediately):
 ### 6.2 Security Hardening
 
 1. **Remove demo data** (if imported):
+
    ```sql
    -- Connect to phpMyAdmin and run:
    DELETE FROM users WHERE email = 'admin@avesat.com';
@@ -195,15 +201,18 @@ Default login credentials (change immediately):
 ### Common Issues
 
 1. **Database Connection Failed**
+
    - Verify database credentials in `.env`
    - Check if database user has proper privileges
    - Ensure database exists
 
 2. **Permission Denied**
+
    - Check file permissions (644/755)
    - Verify `.env` file exists and is readable
 
 3. **API Endpoints Not Working**
+
    - Check `.htaccess` file is uploaded
    - Verify mod_rewrite is enabled
    - Check error logs
@@ -216,12 +225,14 @@ Default login credentials (change immediately):
 ### Error Logs
 
 Check cPanel Error Logs for detailed error information:
+
 - cPanel → Error Logs
 - Look for PHP errors and API request errors
 
 ### Database Issues
 
 Access phpMyAdmin to:
+
 - Check table structure
 - Verify data integrity
 - Run SQL queries for debugging
@@ -240,6 +251,7 @@ Access phpMyAdmin to:
 ## Support
 
 For issues specific to this deployment:
+
 1. Check error logs first
 2. Verify configuration settings
 3. Test database connectivity
@@ -252,6 +264,7 @@ For cPanel-specific issues, contact your hosting provider.
 ### PHP Configuration
 
 Add to `.htaccess` for better performance:
+
 ```apache
 # PHP optimizations
 php_value memory_limit 256M
