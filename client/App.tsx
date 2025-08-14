@@ -42,6 +42,14 @@ import NSSFManagement from "./pages/tax/NSSFManagement";
 import TaxReturns from "./pages/tax/TaxReturns";
 import HousingLevy from "./pages/tax/HousingLevy";
 
+// Employee Deductions Sub-modules
+import LoanManagement from "./pages/deductions/LoanManagement";
+import AdvanceSalary from "./pages/deductions/AdvanceSalary";
+import InsuranceDeductions from "./pages/deductions/InsuranceDeductions";
+import UnionDues from "./pages/deductions/UnionDues";
+import SavingsInvestment from "./pages/deductions/SavingsInvestment";
+import DisciplinaryDeductions from "./pages/deductions/DisciplinaryDeductions";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
