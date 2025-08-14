@@ -135,12 +135,13 @@ const navigationItems: NavigationItem[] = [
     icon: ClipboardList,
     roles: [UserRole.ADMIN, UserRole.PAYROLL_OFFICER, UserRole.HR_MANAGER],
     subModules: [
-      { name: 'Deduction Management', href: '/deductions', icon: ClipboardList, description: 'Manage employee deductions' },
-      { name: 'Loan Management', href: '/deductions/loans', icon: CreditCard, description: 'Staff loans and recovery' },
-      { name: 'SACCO Deductions', href: '/deductions/sacco', icon: Coins, description: 'SACCO savings and loans' },
-      { name: 'Court Orders', href: '/deductions/court', icon: Shield, description: 'Court-ordered deductions' },
-      { name: 'Welfare Funds', href: '/deductions/welfare', icon: Heart, description: 'Employee welfare contributions' },
-      { name: 'Deduction History', href: '/deductions/history', icon: History, description: 'Historical deduction records' }
+      { name: 'Deduction Management', href: '/deductions', icon: ClipboardList, description: 'Manage all employee deductions' },
+      { name: 'Loan Management', href: '/deductions/loans', icon: CreditCard, description: 'Staff loans, applications, and recovery' },
+      { name: 'Advance Salary', href: '/deductions/advance-salary', icon: DollarSign, description: 'Salary advance requests and repayment' },
+      { name: 'Insurance Deductions', href: '/deductions/insurance', icon: Shield, description: 'Insurance policies, premiums, and claims' },
+      { name: 'Union Dues', href: '/deductions/union-dues', icon: Users, description: 'Trade union registration and dues' },
+      { name: 'Savings & Investment', href: '/deductions/savings', icon: PiggyBank, description: 'Employee savings schemes and investments' },
+      { name: 'Disciplinary Deductions', href: '/deductions/disciplinary', icon: AlertTriangle, description: 'Disciplinary actions and penalties' }
     ]
   },
   {
