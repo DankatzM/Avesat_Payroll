@@ -299,39 +299,47 @@ const App = () => (
               path="/deductions/loans"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Loan Management" />
+                  <LoanManagement />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/deductions/sacco"
+              path="/deductions/advance-salary"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="SACCO Deductions" />
+                  <AdvanceSalary />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/deductions/court"
+              path="/deductions/insurance"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Court Orders" />
+                  <InsuranceDeductions />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/deductions/welfare"
+              path="/deductions/union-dues"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Welfare Funds" />
+                  <UnionDues />
                 </ProtectedRoute>
               }
             />
             <Route
-              path="/deductions/history"
+              path="/deductions/savings"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Deduction History" />
+                  <SavingsInvestment />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/deductions/disciplinary"
+              element={
+                <ProtectedRoute>
+                  <DisciplinaryDeductions />
                 </ProtectedRoute>
               }
             />
