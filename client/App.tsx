@@ -58,6 +58,13 @@ import LeaveTypes from "./pages/leave/LeaveTypes";
 import PublicHolidays from "./pages/leave/PublicHolidays";
 import LeaveReports from "./pages/leave/LeaveReports";
 
+// Payslips Sub-modules
+import PayslipTemplates from "./pages/payslips/PayslipTemplates";
+import BulkGeneration from "./pages/payslips/BulkGeneration";
+import EmailDistribution from "./pages/payslips/EmailDistribution";
+import PrintPayslips from "./pages/payslips/PrintPayslips";
+import PayslipHistory from "./pages/payslips/PayslipHistory";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
