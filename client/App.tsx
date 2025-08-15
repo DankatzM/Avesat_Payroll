@@ -50,6 +50,14 @@ import UnionDues from "./pages/deductions/UnionDues";
 import SavingsInvestment from "./pages/deductions/SavingsInvestment";
 import DisciplinaryDeductions from "./pages/deductions/DisciplinaryDeductions";
 
+// Leave Management Sub-modules
+import LeaveApproval from "./pages/leave/LeaveApproval";
+import LeaveBalance from "./pages/leave/LeaveBalance";
+import LeaveCalendar from "./pages/leave/LeaveCalendar";
+import LeaveTypes from "./pages/leave/LeaveTypes";
+import PublicHolidays from "./pages/leave/PublicHolidays";
+import LeaveReports from "./pages/leave/LeaveReports";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
