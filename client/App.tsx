@@ -430,7 +430,7 @@ const App = () => (
               path="/payslips/templates"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Payslip Templates" />
+                  <PayslipTemplates />
                 </ProtectedRoute>
               }
             />
@@ -438,7 +438,7 @@ const App = () => (
               path="/payslips/bulk"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Bulk Generation" />
+                  <BulkGeneration />
                 </ProtectedRoute>
               }
             />
@@ -446,7 +446,7 @@ const App = () => (
               path="/payslips/email"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Email Distribution" />
+                  <EmailDistribution />
                 </ProtectedRoute>
               }
             />
@@ -454,7 +454,7 @@ const App = () => (
               path="/payslips/print"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Print Payslips" />
+                  <PrintPayslips />
                 </ProtectedRoute>
               }
             />
@@ -462,7 +462,7 @@ const App = () => (
               path="/payslips/history"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Payslip History" />
+                  <PayslipHistory />
                 </ProtectedRoute>
               }
             />
