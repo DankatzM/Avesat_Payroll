@@ -365,7 +365,7 @@ const App = () => (
               path="/leave/approval"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Approval" />
+                  <LeaveApproval />
                 </ProtectedRoute>
               }
             />
@@ -373,7 +373,7 @@ const App = () => (
               path="/leave/balance"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Balance" />
+                  <LeaveBalance />
                 </ProtectedRoute>
               }
             />
@@ -381,7 +381,7 @@ const App = () => (
               path="/leave/calendar"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Calendar" />
+                  <LeaveCalendar />
                 </ProtectedRoute>
               }
             />
@@ -389,7 +389,7 @@ const App = () => (
               path="/leave/types"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Types" />
+                  <LeaveTypes />
                 </ProtectedRoute>
               }
             />
@@ -397,7 +397,7 @@ const App = () => (
               path="/leave/holidays"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Public Holidays" />
+                  <PublicHolidays />
                 </ProtectedRoute>
               }
             />
@@ -405,7 +405,7 @@ const App = () => (
               path="/leave/reports"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Leave Reports" />
+                  <LeaveReports />
                 </ProtectedRoute>
               }
             />
