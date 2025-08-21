@@ -69,6 +69,7 @@ import PayslipHistory from "./pages/payslips/PayslipHistory";
 import PayrollRules from "./pages/settings/PayrollRules";
 import StatutoryRates from "./pages/settings/StatutoryRates";
 import UserManagement from "./pages/settings/UserManagement";
+import SystemSettings from "./pages/settings/SystemSettings";
 
 import NotFound from "./pages/NotFound";
 
