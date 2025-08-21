@@ -65,6 +65,11 @@ import EmailDistribution from "./pages/payslips/EmailDistribution";
 import PrintPayslips from "./pages/payslips/PrintPayslips";
 import PayslipHistory from "./pages/payslips/PayslipHistory";
 
+// Settings Sub-modules
+import PayrollRules from "./pages/settings/PayrollRules";
+import StatutoryRates from "./pages/settings/StatutoryRates";
+import UserManagement from "./pages/settings/UserManagement";
+
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
