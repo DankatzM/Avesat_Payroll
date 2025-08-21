@@ -257,7 +257,9 @@ export default function SystemSettings() {
   });
 
   // State for maintenance windows
-  const [maintenanceWindows, setMaintenanceWindows] = useState<MaintenanceWindow[]>([
+  const [maintenanceWindows, setMaintenanceWindows] = useState<
+    MaintenanceWindow[]
+  >([
     {
       id: "1",
       title: "Monthly System Update",
@@ -389,11 +391,11 @@ export default function SystemSettings() {
     try {
       // Simulate backup creation
       await new Promise((resolve) => setTimeout(resolve, 3000));
-      
+
       // Update system health
-      setSystemHealth(prev => ({
+      setSystemHealth((prev) => ({
         ...prev,
-        lastBackup: new Date().toISOString()
+        lastBackup: new Date().toISOString(),
       }));
 
       alert("System backup created successfully!");
@@ -409,7 +411,7 @@ export default function SystemSettings() {
     }
 
     const newMode = !systemConfig.maintenanceMode;
-    setSystemConfig(prev => ({ ...prev, maintenanceMode: newMode }));
+    setSystemConfig((prev) => ({ ...prev, maintenanceMode: newMode }));
 
     // Add to audit log
     const newLog: AuditLog = {
@@ -446,12 +448,13 @@ export default function SystemSettings() {
       emailSettings: { ...emailSettings, smtpPassword: "***" },
       securitySettings,
     };
-    
+
     const dataStr = JSON.stringify(config, null, 2);
-    const dataUri = "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
-    
+    const dataUri =
+      "data:application/json;charset=utf-8," + encodeURIComponent(dataStr);
+
     const exportFileDefaultName = `system-config-${new Date().toISOString().split("T")[0]}.json`;
-    
+
     const linkElement = document.createElement("a");
     linkElement.setAttribute("href", dataUri);
     linkElement.setAttribute("download", exportFileDefaultName);
@@ -488,9 +491,7 @@ export default function SystemSettings() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">
-            System Settings
-          </h1>
+          <h1 className="text-3xl font-bold text-gray-900">System Settings</h1>
           <p className="text-gray-600">
             Configure system-wide settings and preferences
           </p>
@@ -519,7 +520,8 @@ export default function SystemSettings() {
         <Alert variant="destructive">
           <AlertTriangle className="h-4 w-4" />
           <AlertDescription>
-            System is currently in maintenance mode. Users cannot access the application.
+            System is currently in maintenance mode. Users cannot access the
+            application.
           </AlertDescription>
         </Alert>
       )}
@@ -558,7 +560,10 @@ export default function SystemSettings() {
                     id="applicationName"
                     value={systemConfig.applicationName}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, applicationName: e.target.value })
+                      setSystemConfig({
+                        ...systemConfig,
+                        applicationName: e.target.value,
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -570,7 +575,10 @@ export default function SystemSettings() {
                     id="applicationUrl"
                     value={systemConfig.applicationUrl}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, applicationUrl: e.target.value })
+                      setSystemConfig({
+                        ...systemConfig,
+                        applicationUrl: e.target.value,
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -590,10 +598,16 @@ export default function SystemSettings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="Africa/Nairobi">Africa/Nairobi</SelectItem>
+                        <SelectItem value="Africa/Nairobi">
+                          Africa/Nairobi
+                        </SelectItem>
                         <SelectItem value="UTC">UTC</SelectItem>
-                        <SelectItem value="America/New_York">America/New_York</SelectItem>
-                        <SelectItem value="Europe/London">Europe/London</SelectItem>
+                        <SelectItem value="America/New_York">
+                          America/New_York
+                        </SelectItem>
+                        <SelectItem value="Europe/London">
+                          Europe/London
+                        </SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
@@ -632,7 +646,9 @@ export default function SystemSettings() {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="KES">KES (Kenyan Shilling)</SelectItem>
+                        <SelectItem value="KES">
+                          KES (Kenyan Shilling)
+                        </SelectItem>
                         <SelectItem value="USD">USD (US Dollar)</SelectItem>
                         <SelectItem value="EUR">EUR (Euro)</SelectItem>
                       </SelectContent>
@@ -683,7 +699,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={systemConfig.allowRegistration}
                       onCheckedChange={(checked) =>
-                        setSystemConfig({ ...systemConfig, allowRegistration: checked })
+                        setSystemConfig({
+                          ...systemConfig,
+                          allowRegistration: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -698,7 +717,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={systemConfig.requireEmailVerification}
                       onCheckedChange={(checked) =>
-                        setSystemConfig({ ...systemConfig, requireEmailVerification: checked })
+                        setSystemConfig({
+                          ...systemConfig,
+                          requireEmailVerification: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -722,7 +744,10 @@ export default function SystemSettings() {
                     id="companyName"
                     value={systemConfig.companyName}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, companyName: e.target.value })
+                      setSystemConfig({
+                        ...systemConfig,
+                        companyName: e.target.value,
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -734,7 +759,10 @@ export default function SystemSettings() {
                     id="companyAddress"
                     value={systemConfig.companyAddress}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, companyAddress: e.target.value })
+                      setSystemConfig({
+                        ...systemConfig,
+                        companyAddress: e.target.value,
+                      })
                     }
                     disabled={!canManageSystem}
                     rows={3}
@@ -748,7 +776,10 @@ export default function SystemSettings() {
                       id="companyPhone"
                       value={systemConfig.companyPhone}
                       onChange={(e) =>
-                        setSystemConfig({ ...systemConfig, companyPhone: e.target.value })
+                        setSystemConfig({
+                          ...systemConfig,
+                          companyPhone: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -760,7 +791,10 @@ export default function SystemSettings() {
                       type="email"
                       value={systemConfig.companyEmail}
                       onChange={(e) =>
-                        setSystemConfig({ ...systemConfig, companyEmail: e.target.value })
+                        setSystemConfig({
+                          ...systemConfig,
+                          companyEmail: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -774,7 +808,10 @@ export default function SystemSettings() {
                     placeholder="MM-DD"
                     value={systemConfig.fiscalYearStart}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, fiscalYearStart: e.target.value })
+                      setSystemConfig({
+                        ...systemConfig,
+                        fiscalYearStart: e.target.value,
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -792,13 +829,18 @@ export default function SystemSettings() {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div>
-                  <Label htmlFor="sessionTimeout">Session Timeout (minutes)</Label>
+                  <Label htmlFor="sessionTimeout">
+                    Session Timeout (minutes)
+                  </Label>
                   <Input
                     id="sessionTimeout"
                     type="number"
                     value={systemConfig.sessionTimeout}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, sessionTimeout: Number(e.target.value) })
+                      setSystemConfig({
+                        ...systemConfig,
+                        sessionTimeout: Number(e.target.value),
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -811,20 +853,28 @@ export default function SystemSettings() {
                     type="number"
                     value={systemConfig.maxLoginAttempts}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, maxLoginAttempts: Number(e.target.value) })
+                      setSystemConfig({
+                        ...systemConfig,
+                        maxLoginAttempts: Number(e.target.value),
+                      })
                     }
                     disabled={!canManageSystem}
                   />
                 </div>
 
                 <div>
-                  <Label htmlFor="passwordResetExpiry">Password Reset Expiry (hours)</Label>
+                  <Label htmlFor="passwordResetExpiry">
+                    Password Reset Expiry (hours)
+                  </Label>
                   <Input
                     id="passwordResetExpiry"
                     type="number"
                     value={systemConfig.passwordResetExpiry}
                     onChange={(e) =>
-                      setSystemConfig({ ...systemConfig, passwordResetExpiry: Number(e.target.value) })
+                      setSystemConfig({
+                        ...systemConfig,
+                        passwordResetExpiry: Number(e.target.value),
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -832,13 +882,18 @@ export default function SystemSettings() {
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
-                    <Label htmlFor="backupRetention">Backup Retention (days)</Label>
+                    <Label htmlFor="backupRetention">
+                      Backup Retention (days)
+                    </Label>
                     <Input
                       id="backupRetention"
                       type="number"
                       value={systemConfig.backupRetention}
                       onChange={(e) =>
-                        setSystemConfig({ ...systemConfig, backupRetention: Number(e.target.value) })
+                        setSystemConfig({
+                          ...systemConfig,
+                          backupRetention: Number(e.target.value),
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -850,7 +905,10 @@ export default function SystemSettings() {
                       type="number"
                       value={systemConfig.logRetention}
                       onChange={(e) =>
-                        setSystemConfig({ ...systemConfig, logRetention: Number(e.target.value) })
+                        setSystemConfig({
+                          ...systemConfig,
+                          logRetention: Number(e.target.value),
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -862,7 +920,10 @@ export default function SystemSettings() {
 
           {canManageSystem && (
             <div className="flex justify-end">
-              <Button onClick={() => saveConfiguration("General")} disabled={isSaving}>
+              <Button
+                onClick={() => saveConfiguration("General")}
+                disabled={isSaving}
+              >
                 {isSaving ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -905,7 +966,10 @@ export default function SystemSettings() {
                         type="number"
                         value={dbSettings.port}
                         onChange={(e) =>
-                          setDbSettings({ ...dbSettings, port: Number(e.target.value) })
+                          setDbSettings({
+                            ...dbSettings,
+                            port: Number(e.target.value),
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -930,7 +994,10 @@ export default function SystemSettings() {
                         id="dbUsername"
                         value={dbSettings.username}
                         onChange={(e) =>
-                          setDbSettings({ ...dbSettings, username: e.target.value })
+                          setDbSettings({
+                            ...dbSettings,
+                            username: e.target.value,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -939,25 +1006,35 @@ export default function SystemSettings() {
 
                   <div className="grid grid-cols-2 gap-4">
                     <div>
-                      <Label htmlFor="connectionPool">Connection Pool Size</Label>
+                      <Label htmlFor="connectionPool">
+                        Connection Pool Size
+                      </Label>
                       <Input
                         id="connectionPool"
                         type="number"
                         value={dbSettings.connectionPool}
                         onChange={(e) =>
-                          setDbSettings({ ...dbSettings, connectionPool: Number(e.target.value) })
+                          setDbSettings({
+                            ...dbSettings,
+                            connectionPool: Number(e.target.value),
+                          })
                         }
                         disabled={!canManageSystem}
                       />
                     </div>
                     <div>
-                      <Label htmlFor="queryTimeout">Query Timeout (seconds)</Label>
+                      <Label htmlFor="queryTimeout">
+                        Query Timeout (seconds)
+                      </Label>
                       <Input
                         id="queryTimeout"
                         type="number"
                         value={dbSettings.queryTimeout}
                         onChange={(e) =>
-                          setDbSettings({ ...dbSettings, queryTimeout: Number(e.target.value) })
+                          setDbSettings({
+                            ...dbSettings,
+                            queryTimeout: Number(e.target.value),
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -998,7 +1075,10 @@ export default function SystemSettings() {
                       <Switch
                         checked={dbSettings.encryptionEnabled}
                         onCheckedChange={(checked) =>
-                          setDbSettings({ ...dbSettings, encryptionEnabled: checked })
+                          setDbSettings({
+                            ...dbSettings,
+                            encryptionEnabled: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1013,7 +1093,10 @@ export default function SystemSettings() {
                       <Switch
                         checked={dbSettings.auditingEnabled}
                         onCheckedChange={(checked) =>
-                          setDbSettings({ ...dbSettings, auditingEnabled: checked })
+                          setDbSettings({
+                            ...dbSettings,
+                            auditingEnabled: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1028,7 +1111,10 @@ export default function SystemSettings() {
                       <Switch
                         checked={dbSettings.performanceMonitoring}
                         onCheckedChange={(checked) =>
-                          setDbSettings({ ...dbSettings, performanceMonitoring: checked })
+                          setDbSettings({
+                            ...dbSettings,
+                            performanceMonitoring: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1036,17 +1122,17 @@ export default function SystemSettings() {
                   </div>
 
                   <div className="space-y-3">
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
+                    <Button
+                      variant="outline"
+                      className="w-full"
                       disabled={!canManageSystem}
                     >
                       <Database className="w-4 h-4 mr-2" />
                       Test Connection
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      className="w-full" 
+                    <Button
+                      variant="outline"
+                      className="w-full"
                       onClick={createBackup}
                       disabled={!canManageSystem}
                     >
@@ -1061,7 +1147,10 @@ export default function SystemSettings() {
 
           {canManageSystem && (
             <div className="flex justify-end">
-              <Button onClick={() => saveConfiguration("Database")} disabled={isSaving}>
+              <Button
+                onClick={() => saveConfiguration("Database")}
+                disabled={isSaving}
+              >
                 {isSaving ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -1092,7 +1181,10 @@ export default function SystemSettings() {
                         id="smtpHost"
                         value={emailSettings.smtpHost}
                         onChange={(e) =>
-                          setEmailSettings({ ...emailSettings, smtpHost: e.target.value })
+                          setEmailSettings({
+                            ...emailSettings,
+                            smtpHost: e.target.value,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1104,7 +1196,10 @@ export default function SystemSettings() {
                         type="number"
                         value={emailSettings.smtpPort}
                         onChange={(e) =>
-                          setEmailSettings({ ...emailSettings, smtpPort: Number(e.target.value) })
+                          setEmailSettings({
+                            ...emailSettings,
+                            smtpPort: Number(e.target.value),
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1117,7 +1212,10 @@ export default function SystemSettings() {
                       id="smtpUsername"
                       value={emailSettings.smtpUsername}
                       onChange={(e) =>
-                        setEmailSettings({ ...emailSettings, smtpUsername: e.target.value })
+                        setEmailSettings({
+                          ...emailSettings,
+                          smtpUsername: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1130,7 +1228,10 @@ export default function SystemSettings() {
                       type="password"
                       value={emailSettings.smtpPassword}
                       onChange={(e) =>
-                        setEmailSettings({ ...emailSettings, smtpPassword: e.target.value })
+                        setEmailSettings({
+                          ...emailSettings,
+                          smtpPassword: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1141,7 +1242,10 @@ export default function SystemSettings() {
                     <Select
                       value={emailSettings.smtpEncryption}
                       onValueChange={(value) =>
-                        setEmailSettings({ ...emailSettings, smtpEncryption: value as any })
+                        setEmailSettings({
+                          ...emailSettings,
+                          smtpEncryption: value as any,
+                        })
                       }
                       disabled={!canManageSystem}
                     >
@@ -1164,7 +1268,10 @@ export default function SystemSettings() {
                       id="fromName"
                       value={emailSettings.fromName}
                       onChange={(e) =>
-                        setEmailSettings({ ...emailSettings, fromName: e.target.value })
+                        setEmailSettings({
+                          ...emailSettings,
+                          fromName: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1177,7 +1284,10 @@ export default function SystemSettings() {
                       type="email"
                       value={emailSettings.fromEmail}
                       onChange={(e) =>
-                        setEmailSettings({ ...emailSettings, fromEmail: e.target.value })
+                        setEmailSettings({
+                          ...emailSettings,
+                          fromEmail: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1190,7 +1300,10 @@ export default function SystemSettings() {
                       type="email"
                       value={emailSettings.replyToEmail}
                       onChange={(e) =>
-                        setEmailSettings({ ...emailSettings, replyToEmail: e.target.value })
+                        setEmailSettings({
+                          ...emailSettings,
+                          replyToEmail: e.target.value,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1207,7 +1320,10 @@ export default function SystemSettings() {
                       <Switch
                         checked={emailSettings.enableNotifications}
                         onCheckedChange={(checked) =>
-                          setEmailSettings({ ...emailSettings, enableNotifications: checked })
+                          setEmailSettings({
+                            ...emailSettings,
+                            enableNotifications: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1222,7 +1338,10 @@ export default function SystemSettings() {
                       <Switch
                         checked={emailSettings.enableAlerts}
                         onCheckedChange={(checked) =>
-                          setEmailSettings({ ...emailSettings, enableAlerts: checked })
+                          setEmailSettings({
+                            ...emailSettings,
+                            enableAlerts: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
@@ -1237,16 +1356,19 @@ export default function SystemSettings() {
                       <Switch
                         checked={emailSettings.enableReports}
                         onCheckedChange={(checked) =>
-                          setEmailSettings({ ...emailSettings, enableReports: checked })
+                          setEmailSettings({
+                            ...emailSettings,
+                            enableReports: checked,
+                          })
                         }
                         disabled={!canManageSystem}
                       />
                     </div>
                   </div>
 
-                  <Button 
-                    variant="outline" 
-                    className="w-full" 
+                  <Button
+                    variant="outline"
+                    className="w-full"
                     onClick={testEmailConnection}
                     disabled={!canManageSystem}
                   >
@@ -1260,7 +1382,10 @@ export default function SystemSettings() {
 
           {canManageSystem && (
             <div className="flex justify-end">
-              <Button onClick={() => saveConfiguration("Email")} disabled={isSaving}>
+              <Button
+                onClick={() => saveConfiguration("Email")}
+                disabled={isSaving}
+              >
                 {isSaving ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -1295,7 +1420,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.enforceHttps}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, enforceHttps: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          enforceHttps: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1310,7 +1438,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.enableTwoFactor}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, enableTwoFactor: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          enableTwoFactor: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1325,7 +1456,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.allowRememberMe}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, allowRememberMe: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          allowRememberMe: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1340,7 +1474,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.failedLoginLockout}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, failedLoginLockout: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          failedLoginLockout: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1348,13 +1485,18 @@ export default function SystemSettings() {
                 </div>
 
                 <div>
-                  <Label htmlFor="apiRateLimit">API Rate Limit (requests/minute)</Label>
+                  <Label htmlFor="apiRateLimit">
+                    API Rate Limit (requests/minute)
+                  </Label>
                   <Input
                     id="apiRateLimit"
                     type="number"
                     value={securitySettings.apiRateLimit}
                     onChange={(e) =>
-                      setSecuritySettings({ ...securitySettings, apiRateLimit: Number(e.target.value) })
+                      setSecuritySettings({
+                        ...securitySettings,
+                        apiRateLimit: Number(e.target.value),
+                      })
                     }
                     disabled={!canManageSystem}
                   />
@@ -1382,8 +1524,8 @@ export default function SystemSettings() {
                         ...securitySettings,
                         passwordComplexity: {
                           ...securitySettings.passwordComplexity,
-                          minLength: Number(e.target.value)
-                        }
+                          minLength: Number(e.target.value),
+                        },
                       })
                     }
                     disabled={!canManageSystem}
@@ -1394,14 +1536,16 @@ export default function SystemSettings() {
                   <div className="flex items-center justify-between">
                     <Label>Require Uppercase</Label>
                     <Switch
-                      checked={securitySettings.passwordComplexity.requireUppercase}
+                      checked={
+                        securitySettings.passwordComplexity.requireUppercase
+                      }
                       onCheckedChange={(checked) =>
                         setSecuritySettings({
                           ...securitySettings,
                           passwordComplexity: {
                             ...securitySettings.passwordComplexity,
-                            requireUppercase: checked
-                          }
+                            requireUppercase: checked,
+                          },
                         })
                       }
                       disabled={!canManageSystem}
@@ -1410,14 +1554,16 @@ export default function SystemSettings() {
                   <div className="flex items-center justify-between">
                     <Label>Require Lowercase</Label>
                     <Switch
-                      checked={securitySettings.passwordComplexity.requireLowercase}
+                      checked={
+                        securitySettings.passwordComplexity.requireLowercase
+                      }
                       onCheckedChange={(checked) =>
                         setSecuritySettings({
                           ...securitySettings,
                           passwordComplexity: {
                             ...securitySettings.passwordComplexity,
-                            requireLowercase: checked
-                          }
+                            requireLowercase: checked,
+                          },
                         })
                       }
                       disabled={!canManageSystem}
@@ -1426,14 +1572,16 @@ export default function SystemSettings() {
                   <div className="flex items-center justify-between">
                     <Label>Require Numbers</Label>
                     <Switch
-                      checked={securitySettings.passwordComplexity.requireNumbers}
+                      checked={
+                        securitySettings.passwordComplexity.requireNumbers
+                      }
                       onCheckedChange={(checked) =>
                         setSecuritySettings({
                           ...securitySettings,
                           passwordComplexity: {
                             ...securitySettings.passwordComplexity,
-                            requireNumbers: checked
-                          }
+                            requireNumbers: checked,
+                          },
                         })
                       }
                       disabled={!canManageSystem}
@@ -1442,14 +1590,16 @@ export default function SystemSettings() {
                   <div className="flex items-center justify-between">
                     <Label>Require Special Characters</Label>
                     <Switch
-                      checked={securitySettings.passwordComplexity.requireSpecialChars}
+                      checked={
+                        securitySettings.passwordComplexity.requireSpecialChars
+                      }
                       onCheckedChange={(checked) =>
                         setSecuritySettings({
                           ...securitySettings,
                           passwordComplexity: {
                             ...securitySettings.passwordComplexity,
-                            requireSpecialChars: checked
-                          }
+                            requireSpecialChars: checked,
+                          },
                         })
                       }
                       disabled={!canManageSystem}
@@ -1458,7 +1608,9 @@ export default function SystemSettings() {
                 </div>
 
                 <div>
-                  <Label htmlFor="preventReuse">Prevent Password Reuse (last N passwords)</Label>
+                  <Label htmlFor="preventReuse">
+                    Prevent Password Reuse (last N passwords)
+                  </Label>
                   <Input
                     id="preventReuse"
                     type="number"
@@ -1468,8 +1620,8 @@ export default function SystemSettings() {
                         ...securitySettings,
                         passwordComplexity: {
                           ...securitySettings.passwordComplexity,
-                          preventReuse: Number(e.target.value)
-                        }
+                          preventReuse: Number(e.target.value),
+                        },
                       })
                     }
                     disabled={!canManageSystem}
@@ -1498,7 +1650,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.enableAuditLog}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, enableAuditLog: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          enableAuditLog: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1513,7 +1668,10 @@ export default function SystemSettings() {
                     <Switch
                       checked={securitySettings.dataEncryption}
                       onCheckedChange={(checked) =>
-                        setSecuritySettings({ ...securitySettings, dataEncryption: checked })
+                        setSecuritySettings({
+                          ...securitySettings,
+                          dataEncryption: checked,
+                        })
                       }
                       disabled={!canManageSystem}
                     />
@@ -1525,11 +1683,13 @@ export default function SystemSettings() {
                   <Textarea
                     id="ipWhitelist"
                     placeholder="Enter IP addresses, one per line"
-                    value={securitySettings.ipWhitelist.join('\n')}
+                    value={securitySettings.ipWhitelist.join("\n")}
                     onChange={(e) =>
                       setSecuritySettings({
                         ...securitySettings,
-                        ipWhitelist: e.target.value.split('\n').filter(ip => ip.trim())
+                        ipWhitelist: e.target.value
+                          .split("\n")
+                          .filter((ip) => ip.trim()),
                       })
                     }
                     disabled={!canManageSystem}
@@ -1542,7 +1702,10 @@ export default function SystemSettings() {
 
           {canManageSystem && (
             <div className="flex justify-end">
-              <Button onClick={() => saveConfiguration("Security")} disabled={isSaving}>
+              <Button
+                onClick={() => saveConfiguration("Security")}
+                disabled={isSaving}
+              >
                 {isSaving ? (
                   <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
                 ) : (
@@ -1589,7 +1752,9 @@ export default function SystemSettings() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-center">
-                  <span className={getHealthColor(systemHealth.memoryUsage, true)}>
+                  <span
+                    className={getHealthColor(systemHealth.memoryUsage, true)}
+                  >
                     {systemHealth.memoryUsage}%
                   </span>
                 </div>
@@ -1611,7 +1776,9 @@ export default function SystemSettings() {
               </CardHeader>
               <CardContent>
                 <div className="text-3xl font-bold text-center">
-                  <span className={getHealthColor(systemHealth.diskUsage, true)}>
+                  <span
+                    className={getHealthColor(systemHealth.diskUsage, true)}
+                  >
                     {systemHealth.diskUsage}%
                   </span>
                 </div>
@@ -1666,12 +1833,12 @@ export default function SystemSettings() {
                 </div>
                 <div className="flex justify-between">
                   <span>Error Rate:</span>
-                  <Badge 
+                  <Badge
                     className={
-                      systemHealth.errorRate < 0.01 
-                        ? "bg-green-100 text-green-800" 
-                        : systemHealth.errorRate < 0.05 
-                          ? "bg-yellow-100 text-yellow-800" 
+                      systemHealth.errorRate < 0.01
+                        ? "bg-green-100 text-green-800"
+                        : systemHealth.errorRate < 0.05
+                          ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                     }
                   >
@@ -1680,12 +1847,12 @@ export default function SystemSettings() {
                 </div>
                 <div className="flex justify-between">
                   <span>Avg Response Time:</span>
-                  <Badge 
+                  <Badge
                     className={
-                      systemHealth.responseTime < 200 
-                        ? "bg-green-100 text-green-800" 
-                        : systemHealth.responseTime < 500 
-                          ? "bg-yellow-100 text-yellow-800" 
+                      systemHealth.responseTime < 200
+                        ? "bg-green-100 text-green-800"
+                        : systemHealth.responseTime < 500
+                          ? "bg-yellow-100 text-yellow-800"
                           : "bg-red-100 text-red-800"
                     }
                   >
@@ -1703,34 +1870,34 @@ export default function SystemSettings() {
                 </CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   disabled={!canManageSystem}
                 >
                   <RefreshCw className="w-4 h-4 mr-2" />
                   Refresh Health Status
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   onClick={createBackup}
                   disabled={!canManageSystem}
                 >
                   <HardDrive className="w-4 h-4 mr-2" />
                   Create System Backup
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   disabled={!canManageSystem}
                 >
                   <Activity className="w-4 h-4 mr-2" />
                   Clear Cache
                 </Button>
-                <Button 
-                  variant="outline" 
-                  className="w-full" 
+                <Button
+                  variant="outline"
+                  className="w-full"
                   disabled={!canManageSystem}
                 >
                   <FileText className="w-4 h-4 mr-2" />
@@ -1760,7 +1927,7 @@ export default function SystemSettings() {
                   </Button>
                 )}
               </div>
-              
+
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -1775,7 +1942,9 @@ export default function SystemSettings() {
                 <TableBody>
                   {maintenanceWindows.map((window) => (
                     <TableRow key={window.id}>
-                      <TableCell className="font-medium">{window.title}</TableCell>
+                      <TableCell className="font-medium">
+                        {window.title}
+                      </TableCell>
                       <TableCell>{window.description}</TableCell>
                       <TableCell>
                         {new Date(window.startTime).toLocaleString()}
@@ -1784,7 +1953,11 @@ export default function SystemSettings() {
                         {new Date(window.endTime).toLocaleString()}
                       </TableCell>
                       <TableCell>
-                        <Badge variant={window.isActive ? "destructive" : "secondary"}>
+                        <Badge
+                          variant={
+                            window.isActive ? "destructive" : "secondary"
+                          }
+                        >
                           {window.isActive ? "Active" : "Scheduled"}
                         </Badge>
                       </TableCell>
@@ -1895,7 +2068,9 @@ export default function SystemSettings() {
                       </TableCell>
                       <TableCell>{log.description}</TableCell>
                       <TableCell>{log.performedBy}</TableCell>
-                      <TableCell className="font-mono text-sm">{log.ipAddress}</TableCell>
+                      <TableCell className="font-mono text-sm">
+                        {log.ipAddress}
+                      </TableCell>
                       <TableCell>
                         <Badge variant="secondary">{log.category}</Badge>
                       </TableCell>
