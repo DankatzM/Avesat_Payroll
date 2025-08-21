@@ -593,7 +593,7 @@ const App = () => (
               path="/settings/payroll"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Payroll Rules" />
+                  <PayrollRules />
                 </ProtectedRoute>
               }
             />
@@ -601,7 +601,7 @@ const App = () => (
               path="/settings/statutory"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="Statutory Rates" />
+                  <StatutoryRates />
                 </ProtectedRoute>
               }
             />
@@ -609,7 +609,7 @@ const App = () => (
               path="/settings/users"
               element={
                 <ProtectedRoute>
-                  <PlaceholderPage title="User Management" />
+                  <UserManagement />
                 </ProtectedRoute>
               }
             />
